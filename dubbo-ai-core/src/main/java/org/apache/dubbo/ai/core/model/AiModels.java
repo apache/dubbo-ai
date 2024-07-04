@@ -21,5 +21,5 @@ public interface AiModels {
      * @param configModelNames name
      * @return the config name provider
      */
-    ChatModel getChatModel(List<String> configModelNames, JSONObject chatOptions);
+    ChatModel getChatModel(String configModelName, JSONObject chatOptions);
 }

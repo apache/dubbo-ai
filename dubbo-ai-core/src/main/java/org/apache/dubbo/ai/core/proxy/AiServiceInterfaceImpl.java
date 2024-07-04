@@ -7,7 +7,9 @@ import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.chat.model.ChatModel;
+import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
 import org.apache.dubbo.ai.core.model.AiModels;
+import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.util.PropertiesUtil;
 import org.apache.dubbo.common.config.Configuration;
 import org.apache.dubbo.common.stream.StreamObserver;
@@ -27,10 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-/**
- * @author liuzhifei
- * @since 1.0
- */
 public class AiServiceInterfaceImpl {
 
 
@@ -47,12 +45,10 @@ public class AiServiceInterfaceImpl {
         DubboAiService dubboAiService = interfaceClass.getAnnotation(DubboAiService.class);
         String[] modelProvider = dubboAiService.modelProvider();
         constructAiConfig(dubboAiService);
-        Configuration configuration = ApplicationModel.defaultModel().modelEnvironment().getConfiguration();
-        AiModels models = ApplicationModel.defaultModel().getExtension(AiModels.class, dubboAiService.modelCompany());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("model",dubboAiService.model());
-        ChatModel model = models.getChatModel(Arrays.stream(modelProvider).toList(),jsonObject);
-        this.client = ChatClient.builder(model).build();
+        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(modelProvider).toList(), jsonObject);
+        this.client = ChatClient.builder(loadBalanceChatModel).build();
     }
 
     private void constructAiConfig(DubboAiService dubboAiService) {
