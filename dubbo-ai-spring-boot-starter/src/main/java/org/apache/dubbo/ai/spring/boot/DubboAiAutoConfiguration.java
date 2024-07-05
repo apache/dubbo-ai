@@ -16,16 +16,15 @@
  */
 package org.apache.dubbo.ai.spring.boot;
 
-import org.apache.dubbo.config.spring.ServiceBean;
-import org.apache.dubbo.spring.boot.autoconfigure.DubboAutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@AutoConfigureBefore(DubboAutoConfiguration.class)
-@Import(DubboAiBeanPostProcessor.class)
 public class DubboAiAutoConfiguration {
     
+
+    @Bean
+    public DubboAiInitializer dubboAiInitializer() {
+        return new DubboAiInitializer();
+    }
 }

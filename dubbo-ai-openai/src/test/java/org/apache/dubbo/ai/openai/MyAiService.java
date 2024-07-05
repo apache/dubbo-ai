@@ -8,7 +8,7 @@ import org.apache.dubbo.common.stream.StreamObserver;
  * @author liuzhifei
  * @since 1.0
  */
-@DubboAiService(configPath = "dubbo-ai.properties", modelProvider = {"m1", "m2"},model = "gpt-4-all")
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"},model = "gpt-4-all")
 public interface MyAiService {
 
 

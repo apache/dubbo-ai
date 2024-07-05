@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.dubbo.ai.core.proxy;
 
 import com.alibaba.fastjson2.JSONObject;
@@ -6,26 +22,18 @@ import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
-import org.apache.dubbo.ai.core.chat.model.ChatModel;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
-import org.apache.dubbo.ai.core.model.AiModels;
 import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.util.PropertiesUtil;
-import org.apache.dubbo.common.config.Configuration;
 import org.apache.dubbo.common.stream.StreamObserver;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -43,11 +51,11 @@ public class AiServiceInterfaceImpl {
 
     private void constructChatClients() {
         DubboAiService dubboAiService = interfaceClass.getAnnotation(DubboAiService.class);
-        String[] modelProvider = dubboAiService.modelProvider();
+        String[] providerConfigs = dubboAiService.providerConfigs();
         constructAiConfig(dubboAiService);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("model",dubboAiService.model());
-        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(modelProvider).toList(), jsonObject);
+        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(providerConfigs).toList(), jsonObject);
         this.client = ChatClient.builder(loadBalanceChatModel).build();
     }
 

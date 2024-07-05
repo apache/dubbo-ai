@@ -19,44 +19,28 @@ package org.apache.dubbo.ai.spring.boot;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.proxy.ProxyGenerator;
 import org.apache.dubbo.config.ServiceConfig;
-import org.apache.dubbo.config.spring.ServiceBean;
-import org.apache.dubbo.config.spring.context.annotation.DubboClassPathBeanDefinitionScanner;
 import org.apache.dubbo.rpc.model.ApplicationModel;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.ClassMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.ClassUtils;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class DubboAiConfigurationRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware, PriorityOrdered {
+public class DubboAiConfigurationRegistrar implements ImportBeanDefinitionRegistrar, ApplicationListener<ContextRefreshedEvent>, PriorityOrdered {
+    
+    private static final Map<Class<?>, Object> interfaceMap = new HashMap<>();
 
-    private ConfigurableListableBeanFactory beanFactory;
 
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+    public static Map<Class<?>, Object> getInterfaceMap() {
+        return interfaceMap;
     }
 
 
@@ -67,42 +51,49 @@ public class DubboAiConfigurationRegistrar implements ImportBeanDefinitionRegist
         if (metadata.hasAnnotation(annotationName)) {
             Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationName);
             String basePackage = attributes.get("scanBasePackage").toString();
-            ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-            scanner.addIncludeFilter(new AnnotationTypeFilter(DubboAiService.class));
-            scanner.addIncludeFilter((metadataReader, metadataReaderFactory) -> {
-                ClassMetadata classMetadata = metadataReader.getClassMetadata();
-                return classMetadata.isInterface() && metadataReader.getAnnotationMetadata().hasAnnotation(DubboAiService.class.getName());
-            });
-            Set<BeanDefinition> definitions = scanner.findCandidateComponents(basePackage);
-            for (BeanDefinition definition : definitions) {
-                String beanClassName = definition.getBeanClassName();
-                try {
-                    Class<?> beanClass = ClassUtils.forName(beanClassName, this.getClass().getClassLoader());
-                    Object beanInterfaceImpl = ProxyGenerator.createProxy(beanClass);
-                    ServiceConfig<Object> serviceConfig = new ServiceConfig<>();
-                    // serviceConfig.setApplication(ApplicationModel.defaultModel().getCurrentConfig());
-                    serviceConfig.setInterface(beanClass);
-                    serviceConfig.setRef(beanInterfaceImpl);
-                    serviceConfig.export();
-//                    RootBeanDefinition serviceBeanDefinition = new RootBeanDefinition();
-//                    serviceBeanDefinition.setBeanClass(ServiceBean.class);
-//                    serviceBeanDefinition.setLazyInit(false);
-//                    serviceBeanDefinition.getPropertyValues().add("interface", beanClass.getName());
-//                    serviceBeanDefinition.getPropertyValues().add("ref", beanInterfaceImpl);
-//                    serviceBeanDefinition.getPropertyValues().add("application", ApplicationModel.defaultModel().getCurrentConfig());
-//                    registry.registerBeanDefinition("aaa",serviceBeanDefinition);
-                    // definition.getPropertyValues().add("protocol", beanFactory.getBean("protocolConfig"));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+            DubboAiPackageScanner dubboAiPackageScanner = new DubboAiPackageScanner();
+            try {
+                List<String> interfaces = dubboAiPackageScanner.findInterfaces(basePackage);
+                for (String beanClassName : interfaces) {
+                    try {
+                        Class<?> beanClass = ClassUtils.forName(beanClassName, this.getClass().getClassLoader());
+                        if (!beanClass.isAnnotationPresent(DubboAiService.class)) {
+                            continue;
+                        }
+
+                        Object beanInterfaceImpl = ProxyGenerator.createProxy(beanClass);
+                        interfaceMap.put(beanClass, beanInterfaceImpl);
+//                        ServiceConfig<Object> serviceConfig = new ServiceConfig<>();
+//                        serviceConfig.setInterface(beanClass);
+//                        serviceConfig.setApplication(ApplicationModel.defaultModel().getCurrentConfig());
+//                        serviceConfig.setRef(beanInterfaceImpl);
+//                        serviceConfig.export();
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
+
         }
     }
-    
+
 
     @Override
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        interfaceMap.forEach((beanClass, beanInterfaceImpl) -> {
+            ServiceConfig<Object> serviceConfig = new ServiceConfig<>();
+            serviceConfig.setInterface(beanClass);
+            serviceConfig.setApplication(ApplicationModel.defaultModel().getCurrentConfig());
+            serviceConfig.setRef(beanInterfaceImpl);
+            serviceConfig.export();
+        });
     }
 
 //    private void ensureDubboAutoConfigurationProcessed() {

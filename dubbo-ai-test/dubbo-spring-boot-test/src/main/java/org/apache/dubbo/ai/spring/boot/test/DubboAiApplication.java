@@ -22,7 +22,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@EnableDubboAiConfiguration(scanBasePackage = "org.apache.dubbo.ai.spring.boot.test.service")
+@EnableDubboAiConfiguration(scanBasePackage = "org.apache.dubbo.ai.*")
 @EnableDubbo
 public class DubboAiApplication {
     public static void main(String[] args) {

@@ -17,15 +17,22 @@
 package org.apache.dubbo.ai.spring.boot.test.service;
 
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AiService {
+public class AiService implements ApplicationRunner {
 
-//    @DubboReference
-//    private MyAiService myAiService;
-//
-//    public String chat(String msg) {
-//        return myAiService.chat(msg);
-//    }
+    @DubboReference
+    private MyAiService myAiService;
+
+    public String chat(String msg) {
+        return myAiService.chat(msg);
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        System.out.println(myAiService.chat("hi，你是谁"));
+    }
 }

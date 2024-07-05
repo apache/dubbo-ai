@@ -16,7 +16,6 @@
  */
 package org.apache.dubbo.ai.spring.boot;
 
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;

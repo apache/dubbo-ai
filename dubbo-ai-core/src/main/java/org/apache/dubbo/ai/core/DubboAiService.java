@@ -1,11 +1,8 @@
 package org.apache.dubbo.ai.core;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.List;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
@@ -28,7 +25,7 @@ public @interface DubboAiService {
      * dubbo.ai.m1.baseurl = https://api.openai.com
      * you can add more provider and will load balance and fail back to try another
      */
-    String[] modelProvider();
+    String[] providerConfigs();
     
     
     String model() default "gpt-4o";

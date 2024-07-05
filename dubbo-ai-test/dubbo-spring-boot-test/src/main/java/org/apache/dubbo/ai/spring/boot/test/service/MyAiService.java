@@ -19,7 +19,7 @@ package org.apache.dubbo.ai.spring.boot.test.service;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 
-@DubboAiService(modelProvider = "m1",configPath = "dubbo-ai.properties")
+@DubboAiService(providerConfigs = "m1",configPath = "dubbo-ai.properties")
 public interface MyAiService {
     
     @Prompt("""
