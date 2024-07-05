@@ -27,6 +27,8 @@ import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.util.PropertiesUtil;
 import org.apache.dubbo.common.stream.StreamObserver;
 import org.apache.dubbo.rpc.model.ApplicationModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import reactor.core.publisher.Flux;
@@ -39,6 +41,8 @@ import java.util.concurrent.CountDownLatch;
 
 public class AiServiceInterfaceImpl {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(AiServiceInterfaceImpl.class);
 
     Class<?> interfaceClass;
 
@@ -78,7 +82,7 @@ public class AiServiceInterfaceImpl {
                 String replaceValue = args[i].toString();
                 promptTemplate = promptTemplate.replaceAll(name, replaceValue);
             }
-            System.out.println("promptTemplate:" + promptTemplate);
+            logger.info("promptTemplate: {}",promptTemplate);
             ChatClient.CallResponseSpec call = client.prompt().user(promptTemplate).call();
             // 非流调用并返回
             return call.chatResponse().getResult().getOutput().getContent();
@@ -99,15 +103,14 @@ public class AiServiceInterfaceImpl {
                         chatResponse -> {
                             aiStreamObserver.onNext(chatResponse.getResult().getOutput().getContent());
                             // 这里处理每一个聊天响应
-                            // System.out.println("Received chat response: " + chatResponse.getResult());
                         },
                         error -> {
-                            // 处理可能出现的错误
-                            System.err.println("Error occurred: " + error.getMessage());
+                            aiStreamObserver.onError(error);
                         },
                         () -> {
+                            aiStreamObserver.onCompleted();
                             // 流完成时执行
-                            System.out.println("Stream completed");
+                            logger.info("Stream completed");
                             latch.countDown();
                         }
                 );
@@ -115,12 +118,7 @@ public class AiServiceInterfaceImpl {
             }
 
             return null;
-
-            // 流式调用并返回
         }
-        // 在这里处理拦截逻辑
-        System.out.println("Intercepted method: " + method.getName());
-        System.out.println("all args:" + args[0]);
 
         throw new RuntimeException("not support ai return type");
     }
