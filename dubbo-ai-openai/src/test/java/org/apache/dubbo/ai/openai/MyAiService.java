@@ -18,6 +18,7 @@ package org.apache.dubbo.ai.openai;
 
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
 
 
@@ -30,6 +31,17 @@ public interface MyAiService {
             请用中文回答我的这个问题:  {userMessage}
             """)
     String chat(String userMessage);
+
+    @Prompt("""
+            你是一个超高级的人工智能，请你以json的map格式来把下面一段话转成Person的json str格式，Person包含以下字段
+            name:名称，age:年龄，company:公司,city:城市，返回格式为{"name":"xxx","age":1,company:"xxx","city":"xxx"}，
+            下面是请你提取的msg：
+            {userMessage}
+            """)
+    Person chatTransform(String userMessage);
+
+
+    
 
 
     @Prompt("""

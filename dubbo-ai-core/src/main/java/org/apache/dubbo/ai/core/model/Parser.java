@@ -14,13 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core;
+package org.apache.dubbo.ai.core.model;
 
-public class AIResponseParser {
+/**
+ *  parse obj from text
+ */
 
+public interface Parser<T> {
+    
+    
+    T parse(String content);
 
-    public static Object parse() {
-
-        return null;
-    }
+    /**
+     * Description of the text format.
+     * @return the description of the text format.
+     */
+    String formatDesc();
 }

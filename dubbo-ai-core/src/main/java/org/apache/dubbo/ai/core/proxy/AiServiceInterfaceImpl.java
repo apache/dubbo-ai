@@ -20,6 +20,7 @@ import com.alibaba.fastjson2.JSONObject;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
+import org.apache.dubbo.ai.core.model.parser.AiResponseParser;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
@@ -58,7 +59,7 @@ public class AiServiceInterfaceImpl {
         String[] providerConfigs = dubboAiService.providerConfigs();
         constructAiConfig(dubboAiService);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("model",dubboAiService.model());
+        jsonObject.put("model", dubboAiService.model());
         LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(providerConfigs).toList(), jsonObject);
         this.client = ChatClient.builder(loadBalanceChatModel).build();
     }
@@ -72,21 +73,7 @@ public class AiServiceInterfaceImpl {
     @RuntimeType
     public Object intercept(@Origin Method method, @AllArguments Object[] args) throws Exception {
         Class<?> returnType = method.getReturnType();
-        // 非流调用
-        if (returnType.equals(String.class)) {
-            Prompt prompt = method.getAnnotation(Prompt.class);
-            String promptTemplate = prompt.value();
-            Parameter[] parameters = method.getParameters();
-            for (int i = 0; i < parameters.length; i++) {
-                String name = "\\{" + parameters[i].getName() + "}";
-                String replaceValue = args[i].toString();
-                promptTemplate = promptTemplate.replaceAll(name, replaceValue);
-            }
-            logger.info("promptTemplate: {}",promptTemplate);
-            ChatClient.CallResponseSpec call = client.prompt().user(promptTemplate).call();
-            // 非流调用并返回
-            return call.chatResponse().getResult().getOutput().getContent();
-        }
+
         // 如果是复杂对象，则给AI一个提示词，从用户给的数据中返回一个json回来，进行序列化。
         // 非流调用
 
@@ -116,10 +103,27 @@ public class AiServiceInterfaceImpl {
                 );
                 latch.await();
             }
-
             return null;
         }
 
-        throw new RuntimeException("not support ai return type");
+        // 非流调用
+        Prompt prompt = method.getAnnotation(Prompt.class);
+        String promptTemplate = prompt.value();
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            String name = "\\{" + parameters[i].getName() + "}";
+            String replaceValue = args[i].toString();
+            promptTemplate = promptTemplate.replaceAll(name, replaceValue);
+        }
+        logger.info("promptTemplate: {}", promptTemplate);
+        ChatClient.CallResponseSpec call = client.prompt().user(promptTemplate).call();
+        String content = call.content();
+        if (returnType == String.class) {
+            return content;
+        }
+        return AiResponseParser.parse(content,returnType);
+        // 非流调用并返回
+        // return call.chatResponse().getResult().getOutput().getContent();
+        
     }
 }

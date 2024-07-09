@@ -16,8 +16,10 @@
  */
 package org.apache.dubbo.ai.spring.boot.test.service;
 
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.spring.boot.test.pojo.Person;
 
 @DubboAiService(providerConfigs = "m1",configPath = "dubbo-ai.properties")
 public interface MyAiService {
@@ -26,4 +28,16 @@ public interface MyAiService {
             你是一个超高级的人工智能，请你以json的map格式回答一下问题: {userMessage}
             """)
     String chat(String userMessage);
+
+    @Prompt("""
+            你是一个超高级的人工智能，请你以json的map格式回答一下问题: {userMessage}
+            """)
+    JSONObject chatObj(String userMessage);
+
+    @Prompt("""
+            你是一个超高级的人工智能，请你以json的map格式来把下面一段话转成Person的json str格式，Person包含以下字段
+            name:名称，age:年龄，company:公司，返回格式为{"name":"xxx","age":1,company:"xxx"}，下面是请你提取的msg：
+            {userMessage}
+            """)
+    Person chatTransformPerson(String userMessage);
 }

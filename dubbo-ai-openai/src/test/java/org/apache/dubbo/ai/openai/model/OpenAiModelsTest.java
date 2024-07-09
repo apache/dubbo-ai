@@ -19,6 +19,8 @@ package org.apache.dubbo.ai.openai.model;
 
 import org.apache.dubbo.ai.core.RegisterDubboAiService;
 import org.apache.dubbo.ai.openai.MyAiService;
+import org.apache.dubbo.ai.openai.pojo.Person;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class OpenAiModelsTest {
@@ -31,5 +33,18 @@ class OpenAiModelsTest {
         String hi = myAiService.chat("hi");
         System.out.println(hi);
     }
+
+    @Test
+    void testOpenAiObjTransform() {
+        System.setProperty("dubbo.application.serialize-check-status", "DISABLE");
+        RegisterDubboAiService.registerServiceInJvm(MyAiService.class);
+        MyAiService myAiService = RegisterDubboAiService.getDubboReference(MyAiService.class);
+        Person person = myAiService.chatTransform("我是xixingya,来自上海,年龄23,公司是apache");
+        Assertions.assertEquals(23, person.getAge());
+        Assertions.assertEquals("xixingya", person.getName());
+        Assertions.assertEquals("apache", person.getCompany());
+        Assertions.assertEquals("上海",person.getCity());
+    }
+
 
 }
