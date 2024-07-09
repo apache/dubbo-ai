@@ -22,14 +22,14 @@ import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
 
 
-@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"},model = "gpt-4-all")
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "gpt-4-all")
 public interface MyAiService {
 
 
     @Prompt(
             """
-            请用中文回答我的这个问题:  {userMessage}
-            """)
+                    请用中文回答我的这个问题:  {userMessage}
+                    """)
     String chat(String userMessage);
 
     @Prompt("""
@@ -41,7 +41,14 @@ public interface MyAiService {
     Person chatTransform(String userMessage);
 
 
-    
+    @Prompt("""
+            我们现在有以下几个标签，1.游戏 2.交友 3.引流 4.吃喝 5.其他
+            其中，交友和引流的区别是，交友是单纯的一起聊天，引流是某个话题不说完整，吸引用户加好友或者私聊。
+            请你根据上述标签给下面的文本打标，请你只返回标签对应的数字，只返回一个int的数字
+            下面是文本：
+            {userMessage}
+            """)
+    Integer tagMsg(String userMessage);
 
 
     @Prompt("""

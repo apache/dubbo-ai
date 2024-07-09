@@ -46,5 +46,23 @@ class OpenAiModelsTest {
         Assertions.assertEquals("上海",person.getCity());
     }
 
+    @Test
+    void testOpenAiTag() {
+        System.setProperty("dubbo.application.serialize-check-status", "DISABLE");
+        RegisterDubboAiService.registerServiceInJvm(MyAiService.class);
+        MyAiService myAiService = RegisterDubboAiService.getDubboReference(MyAiService.class);
+        Integer tag = myAiService.tagMsg("一起玩游戏呀");
+        Assertions.assertEquals(1,tag);
+        Integer tag2 = myAiService.tagMsg("或许你想来一局王者荣耀");
+        Assertions.assertEquals(1,tag2);
+        Integer tag3 = myAiService.tagMsg("认识一下吗");
+        Assertions.assertEquals(2,tag3);
+        Integer tag4 = myAiService.tagMsg("如果你想了解更多详情，可以加个联系方式");
+        Assertions.assertEquals(3,tag4);
+
+        Integer tag5 = myAiService.tagMsg("大闸蟹超好吃的！");
+        Assertions.assertEquals(4,tag5);
+    }
+
 
 }
