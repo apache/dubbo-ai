@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.ai.spring.boot.test.service;
 
+import org.apache.dubbo.ai.spring.boot.test.pojo.Person;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -33,6 +34,10 @@ public class AiService implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println(myAiService.chat("hi，你是谁"));
+        
+        System.out.println(myAiService.chatObj("hi，你是谁"));
+        System.out.println("---------------------");
+        Person person = myAiService.chatTransformPerson("我是qaq，年龄23，目前就职与apache公司");
+        System.out.println(person.toString());
     }
 }
