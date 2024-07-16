@@ -16,8 +16,6 @@
  */
 package org.apache.dubbo.ai.spring.boot;
 
-import org.springframework.context.annotation.Import;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,7 +25,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DubboAiConfigurationRegistrar.class})
 public @interface EnableDubboAiConfiguration {
     
     String scanBasePackage();

@@ -2,3 +2,5 @@ dubbo:
 
   application:
     name: dubbo-ai-test
+server:
+  port: 8090

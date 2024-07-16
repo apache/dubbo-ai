@@ -14,18 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.core;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class DubboAiAutoConfiguration {
-
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
-    }
-
+public class DubboAiContext {
+    
 }
