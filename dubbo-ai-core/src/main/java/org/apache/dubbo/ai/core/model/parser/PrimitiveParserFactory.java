@@ -18,7 +18,6 @@ package org.apache.dubbo.ai.core.model.parser;
 
 import org.apache.dubbo.ai.core.model.Parser;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,17 +162,6 @@ public class PrimitiveParserFactory {
         public String formatDesc() {
             return "char type";
         }
-    }
-    
-    public Double getA(){
-        return 0d;
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        Class<PrimitiveParserFactory> primitiveParserFactoryClass = PrimitiveParserFactory.class;
-        Method getA = primitiveParserFactoryClass.getMethod("getA");
-        Class<?> returnType = getA.getReturnType();
-        System.out.println(isPrimitiveOrWrapper(returnType));
     }
 
 
