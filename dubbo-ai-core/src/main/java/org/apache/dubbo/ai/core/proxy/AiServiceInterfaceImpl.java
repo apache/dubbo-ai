@@ -23,6 +23,8 @@ import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
+import org.apache.dubbo.ai.core.function.FunctionCall;
+import org.apache.dubbo.ai.core.function.FunctionFactory;
 import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.model.parser.AiResponseParser;
 import org.apache.dubbo.ai.core.util.PropertiesUtil;
@@ -32,11 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -74,8 +79,22 @@ public class AiServiceInterfaceImpl {
     public Object intercept(@Origin Method method, @AllArguments Object[] args) throws Exception {
         Class<?> returnType = method.getReturnType();
 
+        List<FunctionCallbackWrapper<?, ?>> functionCallbackWrappers = new ArrayList<>();
+        // 获取functions
+        if (method.isAnnotationPresent(FunctionCall.class)) {
+            FunctionCall functionCall = method.getAnnotation(FunctionCall.class);
+            Class<?>[] classes = functionCall.functionClasses();
+            for (Class<?> aClass : classes) {
+                functionCallbackWrappers.addAll(FunctionFactory.getFunctionsByClass(aClass));
+            }
+        }
         // 如果是复杂对象，则给AI一个提示词，从用户给的数据中返回一个json回来，进行序列化。
         // 非流调用
+        ChatClient.ChatClientRequestSpec prompted = client.prompt();
+
+        for (FunctionCallbackWrapper<?, ?> functionCallbackWrapper : functionCallbackWrappers) {
+            prompted.function(functionCallbackWrapper);
+        }
 
         // 流式返回
         if (returnType.equals(void.class)) {
@@ -84,7 +103,7 @@ public class AiServiceInterfaceImpl {
             if (parameter.getType().equals(StreamObserver.class)) {
                 StreamObserver<String> aiStreamObserver = (StreamObserver<String>) args[1];
                 // String request = aiStreamObserver.getRequest();
-                Flux<ChatResponse> chatResponseFlux = client.prompt().user(args[0].toString()).stream().chatResponse();
+                Flux<ChatResponse> chatResponseFlux = prompted.user(args[0].toString()).stream().chatResponse();
                 CountDownLatch latch = new CountDownLatch(1);
                 chatResponseFlux.subscribe(
                         chatResponse -> {
@@ -115,15 +134,15 @@ public class AiServiceInterfaceImpl {
             String replaceValue = args[i].toString();
             promptTemplate = promptTemplate.replaceAll(name, replaceValue);
         }
-        logger.info("promptTemplate: {}", promptTemplate);
-        ChatClient.CallResponseSpec call = client.prompt().user(promptTemplate).call();
+        logger.debug("promptTemplate: {}", promptTemplate);
+        ChatClient.CallResponseSpec call = prompted.user(promptTemplate).call();
         String content = call.content();
         if (returnType == String.class) {
             return content;
         }
-        return AiResponseParser.parse(content,returnType);
+        return AiResponseParser.parse(content, returnType);
         // 非流调用并返回
         // return call.chatResponse().getResult().getOutput().getContent();
-        
+
     }
 }
