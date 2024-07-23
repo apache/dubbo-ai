@@ -14,18 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.core.function;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
-public class DubboAiAutoConfiguration {
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
-    }
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Target({METHOD, FIELD, ANNOTATION_TYPE, TYPE})
+@Retention(RUNTIME)
+@Documented
+public @interface FunctionCall {
+    
+    Class<?>[] functionClasses();
+    
 
 }

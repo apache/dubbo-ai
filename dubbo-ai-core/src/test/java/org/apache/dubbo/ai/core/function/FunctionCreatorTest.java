@@ -14,18 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.core.function;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.ai.model.function.FunctionCallbackWrapper;
 
-@Configuration
-public class DubboAiAutoConfiguration {
+import java.util.List;
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
+class FunctionCreatorTest {
+
+    @Test
+    void testGetFunctions() {
+        List<FunctionCallbackWrapper<?, ?>> functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
+        System.out.println(functions.get(0).getInputTypeSchema());
+        Assertions.assertEquals(3, functions.size());
     }
 
 }

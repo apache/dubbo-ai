@@ -1,4 +1,4 @@
-/*
+package org.apache.dubbo.ai.core.function;/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -14,18 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-@Configuration
-public class DubboAiAutoConfiguration {
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
-    }
-
+@Target({METHOD, FIELD, ANNOTATION_TYPE, TYPE})
+@Retention(RUNTIME)
+@Documented
+public @interface AiFunction {
+    
+    String value();
 }

@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.openai.function;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.core.function.FunctionCall;
 
-@Configuration
-public class DubboAiAutoConfiguration {
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "gpt-3.5-turbo")
+public interface FunctionAiService {
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
-    }
+    @Prompt(
+            """
+                    {value}
+                    """)
+    @FunctionCall(functionClasses = MyAiFunction.class)
+    String temp(String value);
 
+    @Prompt(
+            """
+                    calculate is the 2 words len
+                    word1={word1} word2={word2}
+                    """)
+    @FunctionCall(functionClasses = MyAiFunction.class)
+    String sum2Words(String word1,String word2);
 }

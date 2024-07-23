@@ -14,18 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.openai.function;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.apache.dubbo.ai.core.function.AiFunction;
 
-@Configuration
-public class DubboAiAutoConfiguration {
+public class MyAiFunction {
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
+    public record A(String city) {
+
+    }
+    
+    public record TempResponse(int minTemp,int maxTemp,int avgTemp){
+        
     }
 
+    public record WordsDto(String word1, String word2) {
+
+    }
+
+    @AiFunction("get the city temp")
+    public TempResponse temp(A a) {
+        System.out.println("city:" + a.city + " temp = " + 23);
+        return new TempResponse(23,30,25);
+    }
+
+    @AiFunction("sum 2 words length")
+    public int sum2Words(WordsDto wordsDto) {
+        int len = wordsDto.word1.length() + wordsDto.word2.length();
+        System.out.println("words len=0" + len);
+        return len;
+    }
 }

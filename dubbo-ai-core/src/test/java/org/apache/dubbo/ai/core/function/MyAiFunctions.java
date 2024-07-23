@@ -14,18 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.core.function;
 
-import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+public class MyAiFunctions {
 
-@Configuration
-public class DubboAiAutoConfiguration {
+    @AiFunction("calculate the word length")
+    public int lengthOfWords(String word) {
+        return word.length();
+    }
 
-    @Bean
-    public ContextHelper dubboContextHelper() {
-        return new ContextHelper();
+    @AiFunction("sum two values")
+    public int sum(int a, int b) {
+        return a + b;
+    }
+
+    @AiFunction("get weather of the given city ℃")
+    public int sum(String city) {
+        return 28 + (int) (Math.random() * 5);
     }
 
 }
