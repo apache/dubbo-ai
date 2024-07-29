@@ -16,19 +16,17 @@
  */
 package org.apache.dubbo.ai.core.function;
 
-import org.springframework.ai.model.function.FunctionCallbackWrapper;
-
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.lang.reflect.Method;
 
 public class FunctionCreator {
-    
-    public static List<FunctionCallbackWrapper<?,?>> getAiFunctions(Object obj) {
+
+    public static List<FunctionInfo> getAiFunctions(Object obj) {
         Class<?> clazz = obj.getClass();
         Method[] methods = clazz.getMethods();
-        var wrappers = new ArrayList<FunctionCallbackWrapper<?,?>>();
+        var wrappers = new ArrayList<FunctionInfo>();
         for (Method method : methods) {
             if (method.isAnnotationPresent(AiFunction.class)) {
                 AiFunction aiFunction = method.getAnnotation(AiFunction.class);
@@ -41,8 +39,8 @@ public class FunctionCreator {
         return wrappers;
     }
 
-    private static FunctionCallbackWrapper<?,?> createWrapper(Object obj, Method method, String name, String desc) {
-        return FunctionCallbackWrapper.builder(createFunction(obj, method)).withName(name).withDescription(desc).withInputType(method.getParameterTypes()[0]).build();
+    private static FunctionInfo createWrapper(Object obj, Method method, String name, String desc) {
+        return new FunctionInfo<>(name, desc, method.getParameterTypes()[0], createFunction(obj, method));
     }
 
 

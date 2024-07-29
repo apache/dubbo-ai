@@ -14,18 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.spring.ai.dashscope.metadata;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.alibaba.dashscope.aigc.generation.GenerationUsage;
+import org.springframework.ai.chat.metadata.Usage;
 
-class FunctionCreatorTest {
+public class DashscopeUsage implements Usage {
 
-    @Test
-    void testGetFunctions() {
-        var functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
-        System.out.println(functions.get(0).getDesc());
-        Assertions.assertEquals(3, functions.size());
+    private GenerationUsage usage;
+
+    public static DashscopeUsage from(GenerationUsage usage) {
+        return new DashscopeUsage(usage);
     }
 
+    public DashscopeUsage(GenerationUsage usage) {
+        this.usage = usage;
+    }
+
+    @Override
+    public Long getPromptTokens() {
+        return usage.getInputTokens().longValue();
+    }
+
+    @Override
+    public Long getGenerationTokens() {
+        return usage.getOutputTokens().longValue();
+    }
 }

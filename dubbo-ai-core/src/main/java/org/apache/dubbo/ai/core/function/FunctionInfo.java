@@ -16,16 +16,39 @@
  */
 package org.apache.dubbo.ai.core.function;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import java.util.function.Function;
 
-class FunctionCreatorTest {
+public class FunctionInfo<T, I, O> {
 
-    @Test
-    void testGetFunctions() {
-        var functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
-        System.out.println(functions.get(0).getDesc());
-        Assertions.assertEquals(3, functions.size());
+    private final String name;
+
+    private final String desc;
+
+    private final Class<T> inputType;
+
+    private final Function<I, O> function;
+
+    public FunctionInfo(String name, String desc, Class<T> inputType, Function<I, O> function) {
+        this.name = name;
+        this.desc = desc;
+        this.inputType = inputType;
+        this.function = function;
     }
 
+
+    public Function<I, O> getFunction() {
+        return this.function;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public Class<?> getInputType() {
+        return inputType;
+    }
 }
