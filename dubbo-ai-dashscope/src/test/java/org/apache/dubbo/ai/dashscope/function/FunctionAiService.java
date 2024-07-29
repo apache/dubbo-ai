@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.dashscope.function;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.core.function.FunctionCall;
 
-class FunctionCreatorTest {
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1"}, model = "qwen-max")
+public interface FunctionAiService {
 
-    @Test
-    void testGetFunctions() {
-        var functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
-        System.out.println(functions.get(0).getDesc());
-        Assertions.assertEquals(3, functions.size());
-    }
+    @Prompt(
+            """
+                    {value}
+                    """)
+    @FunctionCall(functionClasses = MyAiFunction.class)
+    String temp(String value);
 
+    @Prompt(
+            """
+                    calculate is the 2 words len
+                    word1={word1} word2={word2}
+                    """)
+    @FunctionCall(functionClasses = MyAiFunction.class)
+    String sum2Words(String word1,String word2);
 }

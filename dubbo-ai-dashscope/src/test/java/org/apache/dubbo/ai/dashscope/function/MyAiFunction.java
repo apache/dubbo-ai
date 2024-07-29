@@ -14,18 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.dashscope.function;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.apache.dubbo.ai.core.function.AiFunction;
 
-class FunctionCreatorTest {
+public class MyAiFunction {
 
-    @Test
-    void testGetFunctions() {
-        var functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
-        System.out.println(functions.get(0).getDesc());
-        Assertions.assertEquals(3, functions.size());
+    public record A(String city) {
+
     }
 
+    public record TempResponse(int minTemp,int maxTemp,int avgTemp){
+
+    }
+
+    public record WordsDto(String word1, String word2) {
+
+    }
+
+    @AiFunction("get the city temp")
+    public TempResponse temp(A a) {
+        System.out.println("city:" + a.city + " temp = " + 23);
+        return new TempResponse(23,30,25);
+    }
+
+    @AiFunction("sum 2 words length")
+    public int sum2Words(WordsDto wordsDto) {
+        int len = wordsDto.word1.length() + wordsDto.word2.length();
+        System.out.println("words len=0" + len);
+        return len;
+    }
 }

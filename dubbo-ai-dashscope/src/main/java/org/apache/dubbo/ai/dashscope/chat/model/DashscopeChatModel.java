@@ -14,18 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.dashscope.chat.model;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.apache.dubbo.ai.core.chat.model.ChatModel;
+import org.apache.dubbo.ai.spring.ai.dashscope.DashscopeChatOptions;
+import org.apache.dubbo.ai.spring.ai.dashscope.api.DashscopeApi;
 
-class FunctionCreatorTest {
+public class DashscopeChatModel extends org.apache.dubbo.ai.spring.ai.dashscope.DashscopeChatModel implements ChatModel {
+    public DashscopeChatModel(DashscopeApi dashscopeApi) {
+        super(dashscopeApi);
+    }
 
-    @Test
-    void testGetFunctions() {
-        var functions = FunctionCreator.getAiFunctions(new MyAiFunctions());
-        System.out.println(functions.get(0).getDesc());
-        Assertions.assertEquals(3, functions.size());
+    public DashscopeChatModel(DashscopeApi openAiApi, DashscopeChatOptions options) {
+        super(openAiApi, options);
     }
 
 }

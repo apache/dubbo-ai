@@ -30,6 +30,8 @@
         <module>dubbo-ai-test</module>
         <module>dubbo-ai-spring-boot-starter</module>
         <module>dubbo-ai-openai</module>
+        <module>dubbo-ai-dashscope-spring</module>
+        <module>dubbo-ai-dashscope</module>
     </modules>
 
     <properties>
@@ -63,6 +65,11 @@
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-ai-core</artifactId>
+                <version>${version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-ai-dashscope-spring</artifactId>
                 <version>${version}</version>
             </dependency>
         </dependencies>

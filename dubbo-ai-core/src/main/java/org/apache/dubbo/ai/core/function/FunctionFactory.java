@@ -16,23 +16,26 @@
  */
 package org.apache.dubbo.ai.core.function;
 
-import org.springframework.ai.model.function.FunctionCallbackWrapper;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FunctionFactory {
-    private static final Map<Class<?>, List<FunctionCallbackWrapper<?, ?>>> FUNCTION_MAPS = new HashMap<>();
+    private static final Map<Class<?>, List<FunctionInfo>> FUNCTION_MAPS = new ConcurrentHashMap<>();
 
-    public static List<FunctionCallbackWrapper<?, ?>> getFunctionsByClass(Class<?> clazz) {
+    private static final Map<Method, List<FunctionInfo>> CACHED_METHOD_FUNCTIONS_MAP = new ConcurrentHashMap<>();
+
+    public static List<FunctionInfo> getFunctionsByClass(Class<?> clazz) {
         return FUNCTION_MAPS.computeIfAbsent(clazz, key -> {
             try {
                 Constructor<?> constructor = clazz.getDeclaredConstructor();
                 Object o = constructor.newInstance();
-                return FunctionCreator.getAiFunctions(o);
+                return Collections.unmodifiableList(FunctionCreator.getAiFunctions(o));
             } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
                      IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -40,4 +43,19 @@ public class FunctionFactory {
         });
     }
 
+
+    public static List<FunctionInfo> getFunctionsByMethod(Method method) {
+        if (!method.isAnnotationPresent(FunctionCall.class)) {
+            return Collections.emptyList();
+        }
+        return CACHED_METHOD_FUNCTIONS_MAP.computeIfAbsent(method, key -> {
+            FunctionCall functionCall = method.getAnnotation(FunctionCall.class);
+            Class<?>[] classes = functionCall.functionClasses();
+            List<FunctionInfo> result = new ArrayList<>();
+            for (Class<?> functionClass : classes) {
+                result.addAll(getFunctionsByClass(functionClass));
+            }
+            return Collections.unmodifiableList(result);
+        });
+    }
 }

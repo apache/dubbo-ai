@@ -23,8 +23,8 @@ import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
-import org.apache.dubbo.ai.core.function.FunctionCall;
 import org.apache.dubbo.ai.core.function.FunctionFactory;
+import org.apache.dubbo.ai.core.function.FunctionInfo;
 import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.model.parser.AiResponseParser;
 import org.apache.dubbo.ai.core.util.PropertiesUtil;
@@ -34,12 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -79,21 +77,13 @@ public class AiServiceInterfaceImpl {
     public Object intercept(@Origin Method method, @AllArguments Object[] args) throws Exception {
         Class<?> returnType = method.getReturnType();
 
-        List<FunctionCallbackWrapper<?, ?>> functionCallbackWrappers = new ArrayList<>();
-        // 获取functions
-        if (method.isAnnotationPresent(FunctionCall.class)) {
-            FunctionCall functionCall = method.getAnnotation(FunctionCall.class);
-            Class<?>[] classes = functionCall.functionClasses();
-            for (Class<?> aClass : classes) {
-                functionCallbackWrappers.addAll(FunctionFactory.getFunctionsByClass(aClass));
-            }
-        }
+        List<FunctionInfo> functionInfoList = FunctionFactory.getFunctionsByMethod(method);
         // 如果是复杂对象，则给AI一个提示词，从用户给的数据中返回一个json回来，进行序列化。
         // 非流调用
         ChatClient.ChatClientRequestSpec prompted = client.prompt();
-
-        for (FunctionCallbackWrapper<?, ?> functionCallbackWrapper : functionCallbackWrappers) {
-            prompted.function(functionCallbackWrapper);
+        // add functions to ChatClientRequestSpec
+        for (FunctionInfo functionInfo : functionInfoList) {
+            prompted.function(functionInfo.getName(),functionInfo.getDesc(),functionInfo.getInputType(), functionInfo.getFunction());
         }
 
         // 流式返回
@@ -141,8 +131,6 @@ public class AiServiceInterfaceImpl {
             return content;
         }
         return AiResponseParser.parse(content, returnType);
-        // 非流调用并返回
-        // return call.chatResponse().getResult().getOutput().getContent();
 
     }
 }

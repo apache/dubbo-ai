@@ -17,5 +17,5 @@
 package org.apache.dubbo.ai.core;
 
 public class DubboAiContext {
-    
+
 }

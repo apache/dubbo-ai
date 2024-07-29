@@ -19,6 +19,7 @@ package org.apache.dubbo.ai.core.proxy;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
+
 public class ProxyGenerator {
 
     public static <T> T createProxy(Class<T> interfaceClass) {
