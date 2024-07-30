@@ -62,7 +62,6 @@ public class DashscopeModels implements AiModels {
             dashscopeApi = new DashscopeApi(secretKey);
         }
         return dashscopeApi;
-
     }
     
 }

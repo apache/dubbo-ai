@@ -192,53 +192,6 @@ public class DashscopeChatModel extends AbstractToolCallSupport implements ChatM
         });
     }
 
-//    @Override
-//    protected ChatCompletionRequest doCreateToolResponseRequest(ChatCompletionRequest previousRequest,
-//                                                                ChatCompletionMessage responseMessage, List<ChatCompletionMessage> conversationHistory) {
-//        // Every tool-call item requires a separate function call and a response (TOOL)
-//        // message.
-//        for (ToolCall toolCall : responseMessage.toolCalls()) {
-//
-//            var functionName = toolCall.function().name();
-//            String functionArguments = toolCall.function().arguments();
-//
-//            if (!this.functionCallbackRegister.containsKey(functionName)) {
-//                throw new IllegalStateException("No function callback found for function name: " + functionName);
-//            }
-//
-//            String functionResponse = this.functionCallbackRegister.get(functionName).call(functionArguments);
-//
-//            // Add the function response to the conversation.
-//            conversationHistory
-//                    .add(new ChatCompletionMessage(ChatCompletionMessage.Role.TOOL, functionResponse, functionName, null));
-//        }
-//
-//        // Recursively call chatCompletionWithTools until the model doesn't call a
-//        // functions anymore.
-//        ChatCompletionRequest newRequest = new ChatCompletionRequest(
-//                new ChatCompletionRequestInput(conversationHistory), false);
-//        newRequest = ModelOptionsUtils.merge(newRequest, previousRequest, ChatCompletionRequest.class);
-//
-//        return newRequest;
-//    }
-//
-//    @Override
-//    protected List<ChatCompletionMessage> doGetUserMessages(DashscopeApi.ChatCompletionRequest request) {
-//        return request.chatCompletionInput().messages();
-//    }
-//
-//
-//    protected ChatCompletionMessage doGetToolResponseMessage(ResponseEntity<ChatCompletion> chatCompletion) {
-//        return chatCompletion.getBody().output().choices().iterator().next().message();
-//    }
-//
-//
-//    protected ResponseEntity<GenerationResult> doChatCompletion(DashscopeApi.ChatCompletionRequest request) {
-//        return this.dashscopeApi.chatCompletionEntity(request);
-//    }
-//    
-//
-
     protected boolean isToolFunctionCall(ResponseEntity<GenerationResult> chatCompletion) {
         var body = chatCompletion.getBody();
         if (body == null) {

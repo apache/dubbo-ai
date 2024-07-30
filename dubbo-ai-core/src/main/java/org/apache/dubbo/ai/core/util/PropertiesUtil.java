@@ -35,7 +35,7 @@ public class PropertiesUtil {
         } else if (path.endsWith("properties")) {
             return getPropertiesByProps(path);
         } else {
-            throw new RuntimeException("not support config format");
+            throw new UnsupportedOperationException("not support config format");
         }
     }
 

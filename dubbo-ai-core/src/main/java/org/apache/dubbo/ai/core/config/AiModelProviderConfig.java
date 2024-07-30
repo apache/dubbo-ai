@@ -25,6 +25,8 @@ public class AiModelProviderConfig {
     private String baseUrl;
     
     private String name;
+    
+    private Options options = new Options();
 
     public String getProviderCompany() {
         return providerCompany;
@@ -35,7 +37,7 @@ public class AiModelProviderConfig {
     }
 
     public String getSecretKey() {
-        return secretKey;
+        return this.secretKey;
     }
 
     public void setSecretKey(String secretKey) {
@@ -43,7 +45,7 @@ public class AiModelProviderConfig {
     }
 
     public String getBaseUrl() {
-        return baseUrl;
+        return this.baseUrl;
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -51,10 +53,19 @@ public class AiModelProviderConfig {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
+    
+    public void setOptions(Options options) {
+        this.options = options;
+    }
+    
+    public Options getOptions() {
+        return this.options;
+    }
+    
 }

@@ -14,13 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core;
+package org.apache.dubbo.ai.core.config;
 
-public @interface Options {
+import org.apache.dubbo.ai.core.util.PropertiesUtil;
+import org.apache.dubbo.rpc.model.ApplicationModel;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-    String temperature() default "";
+import java.util.Map;
 
-    String topP() default "";
 
-    String topK() default "";
+
+class ConfigsTest {
+    
+    
+
+    @BeforeAll
+    static void setUp() {
+        String path = "dubbo-ai-example.properties";
+        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
+        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
+    }
+    
+    @Test
+    void testLoadConfig() {
+        AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations("m1");
+    }
+
 }

@@ -60,6 +60,8 @@ public class DashscopeChatOptions implements FunctionCallingOptions, ChatOptions
      * 生成时，采样候选集的大小。例如，取值为50时，仅将单次生成中得分最高的50个token组成随机采样的候选集。取值越大，生成的随机性越高；取值越小，生成的确定性越高。注意：如果top_k参数为空或者top_k的值大于100，表示不启用top_k策略，此时仅有top_p策略生效，默认是空。
      */
     private @JsonProperty("top_k") Integer topK;
+    
+    private @JsonProperty("max_tokens") Integer maxTokens;
 
     /**
      * "text"表示旧版本的text
@@ -183,7 +185,13 @@ public class DashscopeChatOptions implements FunctionCallingOptions, ChatOptions
     public void setEnableSearch(Boolean enableSearch) {
         this.enableSearch = enableSearch;
     }
-
+    
+    public Integer getMaxTokens() {
+        return maxTokens;
+    }
+    public void setMaxTokens(Integer maxTokens) {
+        this.maxTokens = maxTokens;
+    }
     public Float getRepetitionPenalty() {
         return repetitionPenalty;
     }
@@ -348,6 +356,7 @@ public class DashscopeChatOptions implements FunctionCallingOptions, ChatOptions
                 .temperature(this.temperature)
                 .topP(this.topP==null?null:this.topP.doubleValue())
                 .topK(this.topK)
+                .maxTokens(this.maxTokens)
                 .tools(getTools())
                 .stopStrings(this.getStop())
                 .enableSearch(this.enableSearch)
