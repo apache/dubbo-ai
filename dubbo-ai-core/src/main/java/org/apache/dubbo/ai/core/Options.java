@@ -18,9 +18,16 @@ package org.apache.dubbo.ai.core;
 
 public @interface Options {
 
-    String temperature() default "";
+    float temperature() default -1f;
 
-    String topP() default "";
+    float topP() default -1f;
 
-    String topK() default "";
+    int topK() default -1;
+    
+    int maxTokens() default -1;
+    
+    int n() default -1;
+    
+    String responseFormat() default "";
+    
 }
