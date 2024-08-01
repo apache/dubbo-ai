@@ -17,6 +17,7 @@
 package org.apache.dubbo.ai.openai;
 
 import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.Options;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
@@ -30,6 +31,7 @@ public interface MyAiService {
             """
                     请用中文回答我的这个问题:  {userMessage}
                     """)
+    @Options(maxTokens = 4096)
     String chat(String userMessage);
 
     @Prompt("""

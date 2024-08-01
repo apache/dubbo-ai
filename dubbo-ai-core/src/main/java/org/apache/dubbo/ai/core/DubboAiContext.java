@@ -16,6 +16,78 @@
  */
 package org.apache.dubbo.ai.core;
 
+import com.alibaba.fastjson2.JSONObject;
+import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
+import org.apache.dubbo.ai.core.config.Options;
+import org.apache.dubbo.ai.core.model.ModelFactory;
+import org.apache.dubbo.ai.core.type.ClassAiMetadata;
+import org.apache.dubbo.ai.core.type.MethodAiMetadata;
+import org.apache.dubbo.ai.core.util.BeanUtils;
+import org.apache.dubbo.ai.core.util.PropertiesUtil;
+import org.apache.dubbo.rpc.model.ApplicationModel;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.DefaultChatClient;
+import org.springframework.ai.chat.prompt.ChatOptions;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * one class  one Ai Context;
+ */
 public class DubboAiContext {
+
+
+    private DefaultChatClient client;
+
+    private Class<?> aiInterfaceClass;
+
+    private ClassAiMetadata classAiMetadata;
+
+    private Map<Method, MethodAiMetadata> methodMetadataMap = new ConcurrentHashMap<>();
+
+
+    public DubboAiContext(Class<?> aiInterfaceClass) {
+        this.aiInterfaceClass = aiInterfaceClass;
+        classAiMetadata = new ClassAiMetadata(aiInterfaceClass);
+        constructChatClients();
+    }
+
+    private void constructAiConfig(DubboAiService dubboAiService) {
+        String path = dubboAiService.configPath();
+        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
+        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
+    }
+
+
+    /**
+     * merge method options to class options
+     */
+    public Options getMethodOptions(Method method) {
+        MethodAiMetadata methodAiMetadata = methodMetadataMap.computeIfAbsent(method, key -> new MethodAiMetadata(method));
+        ChatOptions classOptions = classAiMetadata.getOptions();
+        ChatOptions methodOptions = methodAiMetadata.getOptions();
+        Options options = new Options();
+        BeanUtils.copyPropertiesIgnoreNull(classOptions, options);
+        BeanUtils.copyPropertiesIgnoreNull(methodOptions, options);
+        return options;
+    }
+
+    private void constructChatClients() {
+        DubboAiService dubboAiService = aiInterfaceClass.getAnnotation(DubboAiService.class);
+        String[] providerConfigs = dubboAiService.providerConfigs();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("model", dubboAiService.model());
+        constructAiConfig(dubboAiService);
+        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(providerConfigs).toList(), jsonObject);
+        this.client = (DefaultChatClient) ChatClient.builder(loadBalanceChatModel).build();
+    }
+
+    public DefaultChatClient getClient() {
+        return client;
+    }
+
 
 }

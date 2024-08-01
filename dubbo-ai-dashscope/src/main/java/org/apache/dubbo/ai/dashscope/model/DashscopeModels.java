@@ -56,7 +56,7 @@ public class DashscopeModels implements AiModels {
     private ModelConfig buildModelConfig(String name) {
         AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations(name);
         String providerCompany = aiModelProviderConfig.getProviderCompany();
-        if (!providerCompany.equals("openai")) {
+        if (!providerCompany.equals("dashscope")) {
             throw new RuntimeException("not support company");
         }
         DashscopeApi dashscopeApi;

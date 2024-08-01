@@ -133,4 +133,5 @@ public class Options implements ChatOptions, ImageOptions {
     public String getResponseFormat() {
         return this.responseFormat;
     }
+    
 }

@@ -43,8 +43,13 @@ public class BeanUtils {
             if (ignoreSet.contains(pd.getName())) {
                 continue;
             }
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null) {
+            try {
+                Object srcValue = src.getPropertyValue(pd.getName());
+                if (srcValue == null) {
+                    ignoreSet.add(pd.getName());
+                }
+            } catch (Exception e) {
+                // if the property is not readable or throws exception, ignore it
                 ignoreSet.add(pd.getName());
             }
         }
