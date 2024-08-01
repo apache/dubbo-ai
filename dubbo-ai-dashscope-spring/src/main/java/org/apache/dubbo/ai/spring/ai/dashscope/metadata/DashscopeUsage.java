@@ -21,7 +21,7 @@ import org.springframework.ai.chat.metadata.Usage;
 
 public class DashscopeUsage implements Usage {
 
-    private GenerationUsage usage;
+    private final GenerationUsage usage;
 
     public static DashscopeUsage from(GenerationUsage usage) {
         return new DashscopeUsage(usage);
