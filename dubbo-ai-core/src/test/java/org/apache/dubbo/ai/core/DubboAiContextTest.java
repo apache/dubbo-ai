@@ -1,3 +1,9 @@
+package org.apache.dubbo.ai.core;
+
+import org.apache.dubbo.ai.core.config.ConfigsTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,25 +20,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.config;
+class DubboAiContextTest extends ConfigsTest {
 
-import org.apache.dubbo.ai.core.util.PropertiesUtil;
-import org.apache.dubbo.rpc.model.ApplicationModel;
-import org.junit.jupiter.api.BeforeAll;
+    @DubboAiService(providerConfigs = {"m1", "m2"}, configPath = "dubbo-ai-example.properties")
+    interface MyAiServiceWrong {
 
-import java.util.Map;
-
-
-
-public class ConfigsTest {
-    
-    
-
-    @BeforeAll
-    static void setUp() {
-        String path = "dubbo-ai-example.properties";
-        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
-        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
     }
+
+    @Test
+    void testDubboAiContextOptionsError() {
+        try {
+            DubboAiContext dubboAiContext = new DubboAiContext(MyAiServiceWrong.class);
+        } catch (Exception e) {
+            Assertions.assertEquals(true, e instanceof IllegalArgumentException);
+        }
+    }
+
 
 }

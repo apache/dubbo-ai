@@ -55,17 +55,11 @@ public @interface Options {
     int DEFAULT_N = -1;
 
     String DEFAULT_RESPONSE_FORMAT = "";
+    
 
-    Class<? extends OptionsProvider> getChangedOptions() default DefaultOptionsProvider.class;
-
-    interface OptionsProvider {
-        org.apache.dubbo.ai.core.config.Options getChangedOptions(Options options);
-    }
-
-    class DefaultOptionsProvider implements OptionsProvider {
-
-        @Override
-        public org.apache.dubbo.ai.core.config.Options getChangedOptions(Options options) {
+    class OptionsOperator {
+        
+        public static org.apache.dubbo.ai.core.config.Options getChangedOptions(Options options) {
             org.apache.dubbo.ai.core.config.Options res = new org.apache.dubbo.ai.core.config.Options();
             if (options.temperature() != DEFAULT_TEMPERATURE) {
                 res.setTemperature(options.temperature());

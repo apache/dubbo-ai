@@ -19,7 +19,6 @@ package org.apache.dubbo.ai.core.type;
 import org.apache.dubbo.ai.core.Options;
 import org.apache.dubbo.ai.core.Prompt;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class MethodAiMetadata implements AiMetadata {
@@ -36,21 +35,13 @@ public class MethodAiMetadata implements AiMetadata {
             optionsAnnotation = method.getAnnotation(Options.class);
         }
         createOptions();
-
     }
 
     private void createOptions() {
         if (optionsAnnotation == null) {
             options = new org.apache.dubbo.ai.core.config.Options();
         }
-        Class<? extends Options.OptionsProvider> changedOptions = optionsAnnotation.getChangedOptions();
-        try {
-            Options.OptionsProvider optionsProvider = changedOptions.getDeclaredConstructor().newInstance();
-            options = optionsProvider.getChangedOptions(optionsAnnotation);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        options =  Options.OptionsOperator.getChangedOptions(optionsAnnotation);
     }
 
     @Override

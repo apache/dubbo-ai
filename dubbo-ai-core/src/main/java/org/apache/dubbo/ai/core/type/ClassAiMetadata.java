@@ -17,22 +17,37 @@
 package org.apache.dubbo.ai.core.type;
 
 import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
+import org.apache.dubbo.ai.core.config.Configs;
 import org.apache.dubbo.ai.core.config.Options;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ClassAiMetadata implements AiMetadata {
-    
+
     private final Class<?> clazz;
 
-    private org.apache.dubbo.ai.core.Options optionsAnnotation;
-    
     private DubboAiService dubboAiService;
-    
+
     public ClassAiMetadata(Class<?> targetClass) {
+        dubboAiService = targetClass.getAnnotation(DubboAiService.class);
         this.clazz = targetClass;
     }
-    
+
     @Override
     public Options getOptions() {
         return new Options();
+    }
+
+    public List<AiModelProviderConfig> getProviderConfigs() {
+        List<String> configModelNames = Arrays.stream(dubboAiService.providerConfigs()).toList();
+        List<AiModelProviderConfig> aiModelProviderConfigs = new ArrayList<>();
+        for (String configModelName : configModelNames) {
+            AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations(configModelName);
+            aiModelProviderConfigs.add(aiModelProviderConfig);
+        }
+        return aiModelProviderConfigs;
     }
 }

@@ -19,6 +19,8 @@ package org.apache.dubbo.ai.core.config;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.image.ImageOptions;
 
+import java.util.Objects;
+
 public class Options implements ChatOptions, ImageOptions {
 
     private Float temperature;
@@ -133,5 +135,17 @@ public class Options implements ChatOptions, ImageOptions {
     public String getResponseFormat() {
         return this.responseFormat;
     }
-    
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Options options)) return false;
+        return Objects.equals(getTemperature(), options.getTemperature()) && Objects.equals(getTopP(), options.getTopP()) && Objects.equals(getTopK(), options.getTopK()) && Objects.equals(getN(), options.getN()) && Objects.equals(getModel(), options.getModel()) && Objects.equals(getWidth(), options.getWidth()) && Objects.equals(getHeight(), options.getHeight()) && Objects.equals(getResponseFormat(), options.getResponseFormat()) && Objects.equals(getMaxTokens(), options.getMaxTokens()) && Objects.equals(getExt(), options.getExt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTemperature(), getTopP(), getTopK(), getN(), getModel(), getWidth(), getHeight(), getResponseFormat(), getMaxTokens(), getExt());
+    }
 }

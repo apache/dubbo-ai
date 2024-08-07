@@ -18,6 +18,7 @@ package org.apache.dubbo.ai.core;
 
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
+import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
 import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.type.ClassAiMetadata;
@@ -27,10 +28,10 @@ import org.apache.dubbo.ai.core.util.PropertiesUtil;
 import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.DefaultChatClient;
-import org.springframework.ai.chat.prompt.ChatOptions;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,11 +53,34 @@ public class DubboAiContext {
     public DubboAiContext(Class<?> aiInterfaceClass) {
         this.aiInterfaceClass = aiInterfaceClass;
         classAiMetadata = new ClassAiMetadata(aiInterfaceClass);
+        checkOptions();
         constructChatClients();
+    }
+
+    /**
+     * check options is same
+     */
+    private void checkOptions() {
+        List<AiModelProviderConfig> providerConfigs = classAiMetadata.getProviderConfigs();
+        if (providerConfigs.size() == 1) {
+            return;
+        }
+        AiModelProviderConfig pre = providerConfigs.get(0);
+        for (int i = 1; i < providerConfigs.size(); i++) {
+            Options preOptions = pre.getOptions();
+            AiModelProviderConfig current = providerConfigs.get(i);
+            Options now = current.getOptions();
+            if (!preOptions.equals(now)) {
+                throw new IllegalArgumentException("you config at @DubboAiService modelConfig Options must same,please check " + pre.getName() + " and " + current.getName());
+            }
+        }
     }
 
     private void constructAiConfig(DubboAiService dubboAiService) {
         String path = dubboAiService.configPath();
+        if (path.isBlank()) {
+            return;
+        }
         Map<String, String> props = PropertiesUtil.getPropsByPath(path);
         ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
     }
@@ -67,8 +91,8 @@ public class DubboAiContext {
      */
     public Options getMethodOptions(Method method) {
         MethodAiMetadata methodAiMetadata = methodMetadataMap.computeIfAbsent(method, key -> new MethodAiMetadata(method));
-        ChatOptions classOptions = classAiMetadata.getOptions();
-        ChatOptions methodOptions = methodAiMetadata.getOptions();
+        Options classOptions = classAiMetadata.getOptions();
+        Options methodOptions = methodAiMetadata.getOptions();
         Options options = new Options();
         BeanUtils.copyPropertiesIgnoreNull(classOptions, options);
         BeanUtils.copyPropertiesIgnoreNull(methodOptions, options);
