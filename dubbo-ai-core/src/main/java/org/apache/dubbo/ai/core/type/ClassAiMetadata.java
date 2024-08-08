@@ -31,23 +31,45 @@ public class ClassAiMetadata implements AiMetadata {
 
     private DubboAiService dubboAiService;
 
+    private Options options;
+
+    List<AiModelProviderConfig> aiModelProviderConfigs;
+
     public ClassAiMetadata(Class<?> targetClass) {
         dubboAiService = targetClass.getAnnotation(DubboAiService.class);
         this.clazz = targetClass;
+        buildAiModelProviderConfigs();
     }
 
     @Override
     public Options getOptions() {
-        return new Options();
+        return this.options;
     }
 
-    public List<AiModelProviderConfig> getProviderConfigs() {
+    private void buildAiModelProviderConfigs() {
         List<String> configModelNames = Arrays.stream(dubboAiService.providerConfigs()).toList();
         List<AiModelProviderConfig> aiModelProviderConfigs = new ArrayList<>();
         for (String configModelName : configModelNames) {
             AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations(configModelName);
+            aiModelProviderConfig.getOptions().setModel(dubboAiService.model());
+            compareOptions(aiModelProviderConfig.getOptions());
             aiModelProviderConfigs.add(aiModelProviderConfig);
         }
+        this.aiModelProviderConfigs = aiModelProviderConfigs;
+    }
+
+    private void compareOptions(Options targetOptions) {
+        if (this.options == null) {
+            this.options = targetOptions;
+            return;
+        }
+        if (options.equals(targetOptions)) {
+            return;
+        }
+        throw new IllegalArgumentException("you config at @DubboAiService modelConfig Options must same,please check  class "+clazz.getName());
+    }
+
+    public List<AiModelProviderConfig> getProviderConfigs() {
         return aiModelProviderConfigs;
     }
 }

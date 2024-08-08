@@ -53,27 +53,11 @@ public class DubboAiContext {
     public DubboAiContext(Class<?> aiInterfaceClass) {
         this.aiInterfaceClass = aiInterfaceClass;
         classAiMetadata = new ClassAiMetadata(aiInterfaceClass);
-        checkOptions();
         constructChatClients();
     }
 
-    /**
-     * check options is same
-     */
-    private void checkOptions() {
-        List<AiModelProviderConfig> providerConfigs = classAiMetadata.getProviderConfigs();
-        if (providerConfigs.size() == 1) {
-            return;
-        }
-        AiModelProviderConfig pre = providerConfigs.get(0);
-        for (int i = 1; i < providerConfigs.size(); i++) {
-            Options preOptions = pre.getOptions();
-            AiModelProviderConfig current = providerConfigs.get(i);
-            Options now = current.getOptions();
-            if (!preOptions.equals(now)) {
-                throw new IllegalArgumentException("you config at @DubboAiService modelConfig Options must same,please check " + pre.getName() + " and " + current.getName());
-            }
-        }
+    public List<AiModelProviderConfig> getAiModelProviderConfigs() {
+        return classAiMetadata.getProviderConfigs();
     }
 
     private void constructAiConfig(DubboAiService dubboAiService) {
