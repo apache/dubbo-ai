@@ -44,13 +44,15 @@ public abstract class LoadBalanceChatModel implements ChatModel {
         if (currentIndex.get() > size - 1) {
             currentIndex.set(0);
         }
-        return chatModels.get(currentIndex.getAndIncrement());
+        return chatModels.get(currentIndex.get());
     }
 
 
     @Override
     public ChatResponse call(Prompt prompt) {
-        return getChatModel().call(prompt);
+        ChatModel chatModel = getChatModel();
+        currentIndex.incrementAndGet();
+        return chatModel.call(prompt);
     }
 
     @Override

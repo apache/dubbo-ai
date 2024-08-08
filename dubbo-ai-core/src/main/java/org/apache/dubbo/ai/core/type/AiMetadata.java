@@ -14,30 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.ai.dashscope.metadata;
+package org.apache.dubbo.ai.core.type;
 
-import com.alibaba.dashscope.aigc.generation.GenerationUsage;
-import org.springframework.ai.chat.metadata.Usage;
+import org.apache.dubbo.ai.core.config.Options;
 
-public class DashscopeUsage implements Usage {
-
-    private final GenerationUsage usage;
-
-    public static DashscopeUsage from(GenerationUsage usage) {
-        return new DashscopeUsage(usage);
-    }
-
-    public DashscopeUsage(GenerationUsage usage) {
-        this.usage = usage;
-    }
-
-    @Override
-    public Long getPromptTokens() {
-        return usage.getInputTokens().longValue();
-    }
-
-    @Override
-    public Long getGenerationTokens() {
-        return usage.getOutputTokens().longValue();
-    }
+public interface AiMetadata {
+    Options getOptions();
 }

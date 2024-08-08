@@ -1,3 +1,9 @@
+package org.apache.dubbo.ai.core;
+
+import org.apache.dubbo.ai.core.config.ConfigsTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,30 +20,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.ai.dashscope.metadata;
+class DubboAiContextTest extends ConfigsTest {
 
-import com.alibaba.dashscope.aigc.generation.GenerationUsage;
-import org.springframework.ai.chat.metadata.Usage;
+    @DubboAiService(providerConfigs = {"m1", "m2"}, configPath = "dubbo-ai-example.properties")
+    interface MyAiServiceWrong {
 
-public class DashscopeUsage implements Usage {
-
-    private final GenerationUsage usage;
-
-    public static DashscopeUsage from(GenerationUsage usage) {
-        return new DashscopeUsage(usage);
     }
 
-    public DashscopeUsage(GenerationUsage usage) {
-        this.usage = usage;
+    @Test
+    void testDubboAiContextOptionsError() {
+        try {
+            DubboAiContext dubboAiContext = new DubboAiContext(MyAiServiceWrong.class);
+        } catch (Exception e) {
+            Assertions.assertEquals(true, e instanceof IllegalArgumentException);
+        }
     }
 
-    @Override
-    public Long getPromptTokens() {
-        return usage.getInputTokens().longValue();
-    }
 
-    @Override
-    public Long getGenerationTokens() {
-        return usage.getOutputTokens().longValue();
-    }
 }

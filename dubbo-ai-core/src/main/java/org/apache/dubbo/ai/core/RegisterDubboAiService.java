@@ -62,9 +62,6 @@ public class RegisterDubboAiService {
     }
 
     public static <T> T getDubboReference(Class<T> interfaceClass) {
-        // 创建ApplicationConfig
-        // ApplicationConfig applicationConfig = ApplicationModel.defaultModel().getApplicationConfigManager().getApplication().get();
-        // 创建ReferenceConfig
         ReferenceConfig<?> referenceConfig = new ReferenceConfig<>();
         // referenceConfig.setApplication(applicationConfig);
         referenceConfig.setProtocol(CommonConstants.TRIPLE);

@@ -16,7 +16,70 @@
  */
 package org.apache.dubbo.ai.core;
 
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Target({METHOD, FIELD, ANNOTATION_TYPE,TYPE})
+@Retention(RUNTIME)
+@Documented
 public @interface Options {
+
+    float temperature() default DEFAULT_TEMPERATURE;
+
+    float topP() default DEFAULT_TOP_P;
+
+    int topK() default DEFAULT_TOP_K;
+
+    int maxTokens() default DEFAULT_MAX_TOKENS;
+
+    int n() default DEFAULT_N;
+
+    String responseFormat() default DEFAULT_RESPONSE_FORMAT;
+
+    float DEFAULT_TEMPERATURE = -1f;
+
+    float DEFAULT_TOP_P = -1f;
+
+    int DEFAULT_TOP_K = -1;
+
+    int DEFAULT_MAX_TOKENS = -1;
+
+    int DEFAULT_N = -1;
+
+    String DEFAULT_RESPONSE_FORMAT = "";
     
-    
+
+    class OptionsOperator {
+        
+        public static org.apache.dubbo.ai.core.config.Options getChangedOptions(Options options) {
+            org.apache.dubbo.ai.core.config.Options res = new org.apache.dubbo.ai.core.config.Options();
+            if (options.temperature() != DEFAULT_TEMPERATURE) {
+                res.setTemperature(options.temperature());
+            }
+            if (options.topP() != DEFAULT_TOP_P) {
+                res.setTemperature(options.topP());
+            }
+            if (options.topK() != DEFAULT_TOP_K) {
+                res.setTopK(options.topK());
+            }
+            if (options.maxTokens() != DEFAULT_MAX_TOKENS) {
+                res.setMaxTokens(options.maxTokens());
+            }
+            if (options.n() != DEFAULT_N) {
+                res.setN(options.n());
+            }
+            if (!options.responseFormat().equals(DEFAULT_RESPONSE_FORMAT)) {
+                res.setResponseFormat(options.responseFormat());
+            }
+            return res;
+        }
+    }
 }

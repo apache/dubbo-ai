@@ -14,30 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.ai.dashscope.metadata;
+package org.apache.dubbo.ai.core.config;
 
-import com.alibaba.dashscope.aigc.generation.GenerationUsage;
-import org.springframework.ai.chat.metadata.Usage;
+import org.apache.dubbo.ai.core.util.PropertiesUtil;
+import org.apache.dubbo.rpc.model.ApplicationModel;
+import org.junit.jupiter.api.BeforeAll;
 
-public class DashscopeUsage implements Usage {
+import java.util.Map;
 
-    private final GenerationUsage usage;
 
-    public static DashscopeUsage from(GenerationUsage usage) {
-        return new DashscopeUsage(usage);
+
+public class ConfigsTest {
+    
+    
+
+    @BeforeAll
+    static void setUp() {
+        String path = "dubbo-ai-example.properties";
+        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
+        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
     }
 
-    public DashscopeUsage(GenerationUsage usage) {
-        this.usage = usage;
-    }
-
-    @Override
-    public Long getPromptTokens() {
-        return usage.getInputTokens().longValue();
-    }
-
-    @Override
-    public Long getGenerationTokens() {
-        return usage.getOutputTokens().longValue();
-    }
 }

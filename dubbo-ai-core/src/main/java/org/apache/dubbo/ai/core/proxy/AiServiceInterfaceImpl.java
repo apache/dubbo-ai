@@ -16,74 +16,62 @@
  */
 package org.apache.dubbo.ai.core.proxy;
 
-import com.alibaba.fastjson2.JSONObject;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
-import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.DubboAiContext;
 import org.apache.dubbo.ai.core.Prompt;
-import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
+import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.ai.core.function.FunctionFactory;
 import org.apache.dubbo.ai.core.function.FunctionInfo;
-import org.apache.dubbo.ai.core.model.ModelFactory;
 import org.apache.dubbo.ai.core.model.parser.AiResponseParser;
-import org.apache.dubbo.ai.core.util.PropertiesUtil;
+import org.apache.dubbo.ai.core.util.BeanUtils;
 import org.apache.dubbo.common.stream.StreamObserver;
-import org.apache.dubbo.rpc.model.ApplicationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.DefaultChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import reactor.core.publisher.Flux;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 public class AiServiceInterfaceImpl {
-
-
+    
     private static final Logger logger = LoggerFactory.getLogger(AiServiceInterfaceImpl.class);
 
     Class<?> interfaceClass;
+    
 
-    ChatClient client;
+    private final DubboAiContext dubboAiContext;
 
     public AiServiceInterfaceImpl(Class<?> interfaceClass) {
         this.interfaceClass = interfaceClass;
-        constructChatClients();
-    }
-
-    private void constructChatClients() {
-        DubboAiService dubboAiService = interfaceClass.getAnnotation(DubboAiService.class);
-        String[] providerConfigs = dubboAiService.providerConfigs();
-        constructAiConfig(dubboAiService);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("model", dubboAiService.model());
-        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(providerConfigs).toList(), jsonObject);
-        this.client = ChatClient.builder(loadBalanceChatModel).build();
-    }
-
-    private void constructAiConfig(DubboAiService dubboAiService) {
-        String path = dubboAiService.configPath();
-        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
-        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
+        dubboAiContext = new DubboAiContext(interfaceClass);
     }
 
     @RuntimeType
     public Object intercept(@Origin Method method, @AllArguments Object[] args) throws Exception {
+        var client = dubboAiContext.getClient();
         Class<?> returnType = method.getReturnType();
 
+        // get functions from method
         List<FunctionInfo> functionInfoList = FunctionFactory.getFunctionsByMethod(method);
+
         // 如果是复杂对象，则给AI一个提示词，从用户给的数据中返回一个json回来，进行序列化。
+
         // 非流调用
-        ChatClient.ChatClientRequestSpec prompted = client.prompt();
+        DefaultChatClient.DefaultChatClientRequestSpec prompted = (DefaultChatClient.DefaultChatClientRequestSpec) client.prompt();
+        Options methodOptions = dubboAiContext.getMethodOptions(method);
+        mergeOptions(methodOptions, prompted);
+
         // add functions to ChatClientRequestSpec
         for (FunctionInfo functionInfo : functionInfoList) {
-            prompted.function(functionInfo.getName(),functionInfo.getDesc(),functionInfo.getInputType(), functionInfo.getFunction());
+            prompted.function(functionInfo.getName(), functionInfo.getDesc(), functionInfo.getInputType(), functionInfo.getFunction());
         }
 
         // 流式返回
@@ -132,5 +120,13 @@ public class AiServiceInterfaceImpl {
         }
         return AiResponseParser.parse(content, returnType);
 
+    }
+
+    private void mergeOptions(Options methodOptions, DefaultChatClient.DefaultChatClientRequestSpec prompted) {
+        ChatOptions chatOptions = prompted.getChatOptions();
+        Options target = new Options();
+        BeanUtils.copyPropertiesIgnoreNull(chatOptions, target);
+        BeanUtils.copyPropertiesIgnoreNull(methodOptions, target);
+        prompted.options(target);
     }
 }

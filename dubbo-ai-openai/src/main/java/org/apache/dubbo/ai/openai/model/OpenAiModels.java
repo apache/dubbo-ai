@@ -20,7 +20,9 @@ import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.chat.model.ChatModel;
 import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
 import org.apache.dubbo.ai.core.config.Configs;
+import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.ai.core.model.AiModels;
+import org.apache.dubbo.ai.core.util.BeanUtils;
 import org.apache.dubbo.ai.openai.chat.model.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
@@ -30,22 +32,27 @@ import java.util.Map;
 
 public class OpenAiModels implements AiModels {
 
-    private final Map<String, OpenAiApi> cachedApi = new HashMap<>();
+    private final Map<String, ModelConfig> cachedConfig = new HashMap<>();
 
     @Override
     public ChatModel getChatModel(String configModelName, JSONObject chatOptions) {
-        OpenAiApi openAiApi = getOpenAiApi(configModelName);
-        return new OpenAiChatModel(openAiApi, chatOptions.to(OpenAiChatOptions.class));
+        ModelConfig modelConfig = getOpenAiConfig(configModelName);
+        Options options = modelConfig.options;
+        OpenAiChatOptions target = new OpenAiChatOptions();
+        OpenAiChatOptions openAiChatOptions = chatOptions.to(OpenAiChatOptions.class);
+        BeanUtils.copyPropertiesIgnoreNull(options,target,"topK");
+        BeanUtils.copyPropertiesIgnoreNull(openAiChatOptions,target,"topK");
+        return new OpenAiChatModel(modelConfig.openAiApi, target);
     }
 
-    private OpenAiApi getOpenAiApi(String name) {
-        if (!cachedApi.containsKey(name)) {
-            cachedApi.put(name, buildApi(name));
+    private ModelConfig getOpenAiConfig(String name) {
+        if (!cachedConfig.containsKey(name)) {
+            cachedConfig.put(name, buildModelConfig(name));
         }
-        return cachedApi.get(name);
+        return cachedConfig.get(name);
     }
 
-    private OpenAiApi buildApi(String name) {
+    private ModelConfig buildModelConfig(String name) {
         AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations(name);
         String providerCompany = aiModelProviderConfig.getProviderCompany();
         if (!providerCompany.equals("openai")) {
@@ -59,7 +66,12 @@ public class OpenAiModels implements AiModels {
         } else {
             openAiApi = new OpenAiApi(secretKey);
         }
-        return openAiApi;
+        Options options = aiModelProviderConfig.getOptions();
+        return new ModelConfig(openAiApi,options);
+    }
+
+    record ModelConfig(OpenAiApi openAiApi, Options options) {
 
     }
+
 }

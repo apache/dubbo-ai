@@ -49,7 +49,7 @@ public class FunctionCreator {
             try {
                 return (R) method.invoke(obj, t);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("can not invoke method " + method.getName(), e);
             }
         };
     }
