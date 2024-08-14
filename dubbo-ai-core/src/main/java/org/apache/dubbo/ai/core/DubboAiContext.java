@@ -16,7 +16,6 @@
  */
 package org.apache.dubbo.ai.core;
 
-import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.chat.model.LoadBalanceChatModel;
 import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
 import org.apache.dubbo.ai.core.config.Options;
@@ -30,7 +29,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.DefaultChatClient;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,13 +81,15 @@ public class DubboAiContext {
         return options;
     }
 
+    public Options getOptions() {
+        return this.classAiMetadata.getOptions();
+    }
+
     private void constructChatClients() {
-        DubboAiService dubboAiService = aiInterfaceClass.getAnnotation(DubboAiService.class);
-        String[] providerConfigs = dubboAiService.providerConfigs();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("model", dubboAiService.model());
-        constructAiConfig(dubboAiService);
-        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(Arrays.stream(providerConfigs).toList(), jsonObject);
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("model", dubboAiService.model());
+        // constructAiConfig(dubboAiService);
+        LoadBalanceChatModel loadBalanceChatModel = ModelFactory.getLoadBalanceChatModel(this);
         this.client = (DefaultChatClient) ChatClient.builder(loadBalanceChatModel).build();
     }
 

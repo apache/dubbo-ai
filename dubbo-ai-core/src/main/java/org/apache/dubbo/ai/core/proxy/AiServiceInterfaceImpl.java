@@ -124,9 +124,9 @@ public class AiServiceInterfaceImpl {
 
     private void mergeOptions(Options methodOptions, DefaultChatClient.DefaultChatClientRequestSpec prompted) {
         ChatOptions chatOptions = prompted.getChatOptions();
-        Options target = new Options();
-        BeanUtils.copyPropertiesIgnoreNull(chatOptions, target);
-        BeanUtils.copyPropertiesIgnoreNull(methodOptions, target);
-        prompted.options(target);
+        Options source = new Options();
+        BeanUtils.copyPropertiesIgnoreNull(source, chatOptions);
+        BeanUtils.copyPropertiesIgnoreNull(methodOptions, chatOptions);
+        prompted.options(chatOptions);
     }
 }

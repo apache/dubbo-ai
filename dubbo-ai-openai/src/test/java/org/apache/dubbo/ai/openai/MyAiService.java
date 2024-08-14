@@ -23,7 +23,7 @@ import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
 
 
-@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "gpt-4-all")
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "deepseek-chat")
 public interface MyAiService {
 
 
@@ -50,6 +50,7 @@ public interface MyAiService {
             下面是文本：
             {userMessage}
             """)
+    @Options(model = "gpt-4o")
     Integer tagMsg(String userMessage);
 
 

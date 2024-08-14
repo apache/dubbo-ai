@@ -260,20 +260,19 @@ public class DashscopeChatModel extends AbstractToolCallSupport implements ChatM
             updateRuntimeOptions = ModelOptionsUtils.copyToTarget(runtimeOptions,
                     ChatOptions.class, DashscopeChatOptions.class);
 
-            Set<String> promptEnabledFunctions = this.handleFunctionCallbackConfigurations(updateRuntimeOptions,
-                    IS_RUNTIME_CALL);
+            Set<String> promptEnabledFunctions = this.runtimeFunctionCallbackConfigurations(updateRuntimeOptions);
             functionsForThisRequest.addAll(promptEnabledFunctions);
         }
 
         if (this.defaultOptions != null) {
-            Set<String> defaultEnabledFunctions = this.handleFunctionCallbackConfigurations(this.defaultOptions,
-                    !IS_RUNTIME_CALL);
+            Set<String> defaultEnabledFunctions = this.runtimeFunctionCallbackConfigurations(this.defaultOptions);
 
             functionsForThisRequest.addAll(defaultEnabledFunctions);
 
 //            chatCompletionRequestParameters = ModelOptionsUtils.merge(chatCompletionRequestParameters,
 //                    this.defaultOptions, ChatCompletionRequestParameters.class);
         }
+        
 
         return new DashscopeApi.ChatCompletionRequest(model, isStream, chatCompletionInputs, updateRuntimeOptions.toGenerationParam());
     }

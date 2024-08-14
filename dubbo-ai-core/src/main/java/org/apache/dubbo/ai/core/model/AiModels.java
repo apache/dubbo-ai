@@ -17,8 +17,9 @@
 package org.apache.dubbo.ai.core.model;
 
 
-import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.chat.model.ChatModel;
+import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
+import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.common.extension.SPI;
 
 @SPI
@@ -30,5 +31,5 @@ public interface AiModels {
      * @param configModelName name
      * @return the config name provider
      */
-    ChatModel getChatModel(String configModelName, JSONObject chatOptions);
+    ChatModel getChatModel(AiModelProviderConfig configModelName, Options chatOptions);
 }

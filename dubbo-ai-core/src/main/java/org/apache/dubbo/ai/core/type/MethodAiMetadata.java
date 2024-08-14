@@ -40,6 +40,7 @@ public class MethodAiMetadata implements AiMetadata {
     private void createOptions() {
         if (optionsAnnotation == null) {
             options = new org.apache.dubbo.ai.core.config.Options();
+            return;
         }
         options =  Options.OptionsOperator.getChangedOptions(optionsAnnotation);
     }

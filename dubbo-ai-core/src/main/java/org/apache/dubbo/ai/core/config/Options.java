@@ -16,9 +16,11 @@
  */
 package org.apache.dubbo.ai.core.config;
 
+import com.alibaba.fastjson2.JSON;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.image.ImageOptions;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Options implements ChatOptions, ImageOptions {
@@ -42,6 +44,14 @@ public class Options implements ChatOptions, ImageOptions {
     private Integer maxTokens;
 
     private String ext;
+    
+    private String style;
+    
+    private Float presencePenalty;
+    
+    private Float frequencyPenalty;
+    
+    private List<String> stopSequences;
 
     public void setTemperature(Float temperature) {
         this.temperature = temperature;
@@ -83,6 +93,16 @@ public class Options implements ChatOptions, ImageOptions {
         return this.maxTokens;
     }
 
+    @Override
+    public Float getPresencePenalty() {
+        return presencePenalty;
+    }
+
+    @Override
+    public List<String> getStopSequences() {
+        return stopSequences;
+    }
+
     public void setExt(String ext) {
         this.ext = ext;
     }
@@ -108,7 +128,7 @@ public class Options implements ChatOptions, ImageOptions {
 
     @Override
     public ChatOptions copy() {
-        return null;
+        return JSON.copy(this);
     }
 
     @Override
@@ -119,6 +139,11 @@ public class Options implements ChatOptions, ImageOptions {
     @Override
     public String getModel() {
         return this.model;
+    }
+
+    @Override
+    public Float getFrequencyPenalty() {
+        return frequencyPenalty;
     }
 
     @Override
@@ -136,6 +161,28 @@ public class Options implements ChatOptions, ImageOptions {
         return this.responseFormat;
     }
 
+    @Override
+    public String getStyle() {
+        return style;
+    }
+    
+    
+
+    public void setPresencePenalty(Float presencePenalty) {
+        this.presencePenalty = presencePenalty;
+    }
+
+    public void setStopSequences(List<String> stopSequences) {
+        this.stopSequences = stopSequences;
+    }
+
+    public void setFrequencyPenalty(Float frequencyPenalty) {
+        this.frequencyPenalty = frequencyPenalty;
+    }
+
+    public void setStyle(String style) {
+        this.style = style;
+    }
 
     @Override
     public boolean equals(Object o) {
