@@ -20,10 +20,13 @@ import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
 import org.apache.dubbo.ai.core.config.Configs;
 import org.apache.dubbo.ai.core.config.Options;
+import org.apache.dubbo.ai.core.util.PropertiesUtil;
+import org.apache.dubbo.rpc.model.ApplicationModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ClassAiMetadata implements AiMetadata {
 
@@ -38,6 +41,7 @@ public class ClassAiMetadata implements AiMetadata {
     public ClassAiMetadata(Class<?> targetClass) {
         dubboAiService = targetClass.getAnnotation(DubboAiService.class);
         this.clazz = targetClass;
+        constructAiConfig(dubboAiService);
         buildAiModelProviderConfigs();
     }
 
@@ -66,10 +70,19 @@ public class ClassAiMetadata implements AiMetadata {
         if (options.equals(targetOptions)) {
             return;
         }
-        throw new IllegalArgumentException("you config at @DubboAiService modelConfig Options must same,please check  class "+clazz.getName());
+        throw new IllegalArgumentException("you config at class @DubboAiService modelConfig Options must same,please check  class "+ clazz.getName()+" providerConfigs property");
     }
 
     public List<AiModelProviderConfig> getProviderConfigs() {
         return aiModelProviderConfigs;
+    }
+
+    private void constructAiConfig(DubboAiService dubboAiService) {
+        String path = dubboAiService.configPath();
+        if (path.isBlank()) {
+            return;
+        }
+        Map<String, String> props = PropertiesUtil.getPropsByPath(path);
+        ApplicationModel.defaultModel().modelEnvironment().updateAppConfigMap(props);
     }
 }

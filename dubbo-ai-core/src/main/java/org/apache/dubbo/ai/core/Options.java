@@ -33,6 +33,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Options {
 
     float temperature() default DEFAULT_TEMPERATURE;
+    
+    String model() default DEFAULT_MODEL;
 
     float topP() default DEFAULT_TOP_P;
 
@@ -56,6 +58,8 @@ public @interface Options {
 
     String DEFAULT_RESPONSE_FORMAT = "";
     
+    String DEFAULT_MODEL = "";
+    
 
     class OptionsOperator {
         
@@ -65,7 +69,7 @@ public @interface Options {
                 res.setTemperature(options.temperature());
             }
             if (options.topP() != DEFAULT_TOP_P) {
-                res.setTemperature(options.topP());
+                res.setTopP(options.topP());
             }
             if (options.topK() != DEFAULT_TOP_K) {
                 res.setTopK(options.topK());
@@ -78,6 +82,9 @@ public @interface Options {
             }
             if (!options.responseFormat().equals(DEFAULT_RESPONSE_FORMAT)) {
                 res.setResponseFormat(options.responseFormat());
+            }
+            if(!options.model().equals(DEFAULT_MODEL)){
+                res.setModel(options.model());
             }
             return res;
         }

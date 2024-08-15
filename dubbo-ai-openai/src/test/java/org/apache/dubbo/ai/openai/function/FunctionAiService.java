@@ -20,7 +20,7 @@ import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.function.FunctionCall;
 
-@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "gpt-3.5-turbo")
+@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "deepseek-chat")
 public interface FunctionAiService {
 
     @Prompt(

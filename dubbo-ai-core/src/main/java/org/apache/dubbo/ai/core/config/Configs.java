@@ -33,12 +33,14 @@ public class Configs {
     private static final String PROVIDER_FORMAT = "dubbo.ai.%s.provider";
 
     private static final String BASEURL_FORMAT = "dubbo.ai.%s.baseUrl";
-    
+
     private static final String OPTIONS_FORMAT = "dubbo.ai.%s.options";
 
     private static final String SK_FORMAT = "dubbo.ai.%s.sk";
 
     private static final String LOAD_BALANCE_PROVIDERS = "dubbo.ai.%s.loadbalance.providers";
+
+    private static final String AI_SERVICE_REGISTER = "dubbo.ai.service.register";
 
     public static AiModelProviderConfig buildFromConfigurations(String name) {
         CompositeConfiguration configuration = ApplicationModel.defaultModel().modelEnvironment().getConfiguration();
@@ -48,7 +50,7 @@ public class Configs {
         aiModelProviderConfig.setBaseUrl(configuration.getString(String.format(BASEURL_FORMAT, name)));
         aiModelProviderConfig.setSecretKey(configuration.getString(String.format(SK_FORMAT, name)));
         var prefix = String.format(OPTIONS_FORMAT, name);
-        var prefixedConfiguration = new PrefixedConfiguration(configuration,prefix);
+        var prefixedConfiguration = new PrefixedConfiguration(configuration, prefix);
         List<String> properties = getProperties(Options.class);
         Options options = new Options();
         BeanWrapper wrapper = new BeanWrapperImpl(options);
@@ -58,6 +60,11 @@ public class Configs {
         }
         aiModelProviderConfig.setOptions(options);
         return aiModelProviderConfig;
+    }
+
+    public static String getAiServiceRegister() {
+        CompositeConfiguration configuration = ApplicationModel.defaultModel().modelEnvironment().getConfiguration();
+        return configuration.getString(AI_SERVICE_REGISTER);
     }
 
     public static List<String> getProperties(Class<?> clazz) {

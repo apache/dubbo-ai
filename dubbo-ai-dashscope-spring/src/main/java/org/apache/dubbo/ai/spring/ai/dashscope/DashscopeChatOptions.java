@@ -125,6 +125,11 @@ public class DashscopeChatOptions implements FunctionCallingOptions, ChatOptions
     public String getModel() {
         return model;
     }
+    
+    @Override 
+    public Float getFrequencyPenalty() {
+        return null;
+    }
 
     public void setModel(String model) {
         this.model = model;
@@ -188,6 +193,14 @@ public class DashscopeChatOptions implements FunctionCallingOptions, ChatOptions
     
     public Integer getMaxTokens() {
         return maxTokens;
+    }
+    @Override 
+    public Float getPresencePenalty() {
+        return null;
+    }
+    @Override 
+    public List<String> getStopSequences() {
+        return null;
     }
     public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;

@@ -16,10 +16,8 @@
  */
 package org.apache.dubbo.ai.dashscope.model;
 
-import com.alibaba.fastjson2.JSONObject;
 import org.apache.dubbo.ai.core.chat.model.ChatModel;
 import org.apache.dubbo.ai.core.config.AiModelProviderConfig;
-import org.apache.dubbo.ai.core.config.Configs;
 import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.ai.core.model.AiModels;
 import org.apache.dubbo.ai.core.util.BeanUtils;
@@ -32,47 +30,38 @@ import java.util.Map;
 
 public class DashscopeModels implements AiModels {
 
-    private final Map<String, ModelConfig> cachedConfig = new HashMap<>();
+    private final Map<String, DashscopeApi> cachedConfig = new HashMap<>();
 
 
     @Override
-    public ChatModel getChatModel(String configModelName, JSONObject chatOptions) {
-        ModelConfig modelConfig = getDashscopeApi(configModelName);
-        Options options = modelConfig.options;
+    public ChatModel getChatModel(AiModelProviderConfig aiModelProviderConfig, Options chatOptions) {
         var target = new DashscopeChatOptions();
-        BeanUtils.copyPropertiesIgnoreNull(options, target);
-        BeanUtils.copyPropertiesIgnoreNull(chatOptions.to(DashscopeChatOptions.class), target);
-        return new DashscopeChatModel(modelConfig.dashscopeApi, target);
+        BeanUtils.copyPropertiesIgnoreNull(chatOptions, target);
+        return new DashscopeChatModel(getDashscopeApi(aiModelProviderConfig), target);
     }
 
 
-    private ModelConfig getDashscopeApi(String name) {
+    private DashscopeApi getDashscopeApi(AiModelProviderConfig aiModelProviderConfig) {
+        String name = aiModelProviderConfig.getName();
         if (!cachedConfig.containsKey(name)) {
-            cachedConfig.put(name, buildModelConfig(name));
+            cachedConfig.put(name, buildDashscopeApi(aiModelProviderConfig));
         }
         return cachedConfig.get(name);
     }
 
-    private ModelConfig buildModelConfig(String name) {
-        AiModelProviderConfig aiModelProviderConfig = Configs.buildFromConfigurations(name);
+    private DashscopeApi buildDashscopeApi(AiModelProviderConfig aiModelProviderConfig) {
         String providerCompany = aiModelProviderConfig.getProviderCompany();
         if (!providerCompany.equals("dashscope")) {
             throw new RuntimeException("not support company");
         }
-        DashscopeApi dashscopeApi;
         String baseUrl = aiModelProviderConfig.getBaseUrl();
         String secretKey = aiModelProviderConfig.getSecretKey();
+
         if (baseUrl != null) {
-            dashscopeApi = new DashscopeApi(baseUrl, secretKey);
+            return new DashscopeApi(baseUrl, secretKey);
         } else {
-            dashscopeApi = new DashscopeApi(secretKey);
+            return new DashscopeApi(secretKey);
         }
-        Options options = aiModelProviderConfig.getOptions();
-        return new ModelConfig(dashscopeApi, options);
-    }
-
-    record ModelConfig(DashscopeApi dashscopeApi, Options options) {
-
     }
 
 }
