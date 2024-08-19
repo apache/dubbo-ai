@@ -21,6 +21,7 @@ import org.apache.dubbo.ai.core.RegisterDubboAiService;
 import org.apache.dubbo.ai.openai.MyAiService;
 import org.apache.dubbo.ai.openai.function.FunctionAiService;
 import org.apache.dubbo.ai.openai.pojo.Person;
+import org.apache.dubbo.common.stream.StreamObserver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -76,6 +77,30 @@ class OpenAiModelsTest {
         String s = functionAiService.sum2Words("hello", "world");
         System.out.println(s);
         Assertions.assertTrue(s.contains("10"));
+    }
+    
+    @Test
+    void testStream() {
+        System.setProperty("dubbo.application.serialize-check-status", "DISABLE");
+        System.setProperty("dubbo.application.check-serializable", "false");
+        RegisterDubboAiService.registerServiceInJvm(MyAiService.class);
+        MyAiService myAiService = RegisterDubboAiService.getDubboReference(MyAiService.class);
+        myAiService.chatStream("一起玩游戏呀", new StreamObserver<String>() {
+            @Override
+            public void onNext(String data) {
+                System.out.println("data="+data);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        });
     }
     
 }
