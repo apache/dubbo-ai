@@ -57,5 +57,5 @@ public interface MyAiService {
     @Prompt("""
             请用中文回答我的这个问题:  {userMessage}
             """)
-    void chat(String userMessage, StreamObserver<String> response);
+    void chatStream(String userMessage, StreamObserver<String> response);
 }

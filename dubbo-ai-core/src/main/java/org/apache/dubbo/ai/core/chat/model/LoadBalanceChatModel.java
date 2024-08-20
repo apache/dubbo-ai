@@ -19,6 +19,7 @@ package org.apache.dubbo.ai.core.chat.model;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +61,12 @@ public abstract class LoadBalanceChatModel implements ChatModel {
         return getChatModel().getDefaultOptions();
     }
 
+    @Override
+    public Flux<ChatResponse> stream(Prompt prompt) {
+        ChatModel chatModel = getChatModel();
+        currentIndex.incrementAndGet();
+        return chatModel.stream(prompt);
+    }
 
     public abstract List<ChatModel> getChatModels();
 }
