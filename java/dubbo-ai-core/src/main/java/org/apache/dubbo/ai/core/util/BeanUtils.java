@@ -58,4 +58,20 @@ public class BeanUtils {
         return ignoreSet.toArray(result);
     }
 
+    public static boolean isPrimitiveOrWrapper(Class<?> clazz) {
+        return clazz.isPrimitive() ||
+                clazz == Boolean.class ||
+                clazz == Character.class ||
+                clazz == Byte.class ||
+                clazz == Short.class ||
+                clazz == Integer.class ||
+                clazz == Long.class ||
+                clazz == Float.class ||
+                clazz == Double.class;
+    }
+    
+    public static boolean isPrimitiveOrWrapperOrString(Class<?> clazz) {
+        return isPrimitiveOrWrapper(clazz)|| clazz == String.class;
+    }
+
 }

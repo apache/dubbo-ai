@@ -20,12 +20,22 @@ package org.apache.dubbo.ai.openai.model;
 import org.apache.dubbo.ai.core.RegisterDubboAiService;
 import org.apache.dubbo.ai.openai.MyAiService;
 import org.apache.dubbo.ai.openai.function.FunctionAiService;
+import org.apache.dubbo.ai.openai.pojo.ChatMsg;
 import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 class OpenAiModelsTest {
+    
+    @BeforeAll
+    static void setUp() {
+        System.setProperty("dubbo.application.serialize-check-status", "DISABLE");
+        System.setProperty("dubbo.application.check-serializable", "false");
+    }
 
     @Test
     void testOpenAiModelConfig() {
@@ -78,17 +88,15 @@ class OpenAiModelsTest {
         System.out.println(s);
         Assertions.assertTrue(s.contains("10"));
     }
-    
+
     @Test
     void testStream() {
-        System.setProperty("dubbo.application.serialize-check-status", "DISABLE");
-        System.setProperty("dubbo.application.check-serializable", "false");
         RegisterDubboAiService.registerServiceInJvm(MyAiService.class);
         MyAiService myAiService = RegisterDubboAiService.getDubboReference(MyAiService.class);
         myAiService.chatStream("一起玩游戏呀", new StreamObserver<String>() {
             @Override
             public void onNext(String data) {
-                System.out.println("data="+data);
+                System.out.println("data=" + data);
             }
 
             @Override
@@ -102,5 +110,18 @@ class OpenAiModelsTest {
             }
         });
     }
-    
+
+    @Test
+    void testComplexVal() {
+        RegisterDubboAiService.registerServiceInJvm(MyAiService.class);
+        MyAiService myAiService = RegisterDubboAiService.getDubboReference(MyAiService.class);
+        ChatMsg chatMsg = new ChatMsg();
+        chatMsg.setRequestMsg("地球环境");
+        chatMsg.setCount(5);
+        chatMsg.setName("qaq");
+        List<String> questions = myAiService.complexChat(chatMsg);
+        Assertions.assertEquals(5,questions.size());
+
+    }
+
 }

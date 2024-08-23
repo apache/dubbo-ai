@@ -21,6 +21,7 @@ import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.dubbo.ai.core.DubboAiContext;
 import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.core.Val;
 import org.apache.dubbo.ai.core.config.Options;
 import org.apache.dubbo.ai.core.function.FunctionFactory;
 import org.apache.dubbo.ai.core.function.FunctionInfo;
@@ -33,19 +34,23 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.DefaultChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import reactor.core.publisher.Flux;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class AiServiceInterfaceImpl {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AiServiceInterfaceImpl.class);
 
-    Class<?> interfaceClass;
-    
+    private final Class<?> interfaceClass;
+
 
     private final DubboAiContext dubboAiContext;
 
@@ -73,15 +78,17 @@ public class AiServiceInterfaceImpl {
         for (FunctionInfo functionInfo : functionInfoList) {
             prompted.function(functionInfo.getName(), functionInfo.getDesc(), functionInfo.getInputType(), functionInfo.getFunction());
         }
-
-        // 流式返回
+        
+        String promptTemplate = getPromptTemplate(method, args);
+        logger.debug("promptTemplate: {}", promptTemplate);
+        // stream return
         if (returnType.equals(void.class)) {
             // 固定两个参数
             Parameter parameter = method.getParameters()[1];
             if (parameter.getType().equals(StreamObserver.class)) {
                 StreamObserver<String> aiStreamObserver = (StreamObserver<String>) args[1];
                 // String request = aiStreamObserver.getRequest();
-                Flux<ChatResponse> chatResponseFlux = prompted.user(args[0].toString()).stream().chatResponse();
+                Flux<ChatResponse> chatResponseFlux = prompted.user(promptTemplate).stream().chatResponse();
                 CountDownLatch latch = new CountDownLatch(1);
                 chatResponseFlux.subscribe(
                         chatResponse -> {
@@ -94,7 +101,7 @@ public class AiServiceInterfaceImpl {
                         () -> {
                             aiStreamObserver.onCompleted();
                             // 流完成时执行
-                            logger.info("Stream completed");
+                            logger.debug("Stream completed");
                             latch.countDown();
                         }
                 );
@@ -102,17 +109,8 @@ public class AiServiceInterfaceImpl {
             }
             return null;
         }
-
-        // 非流调用
-        Prompt prompt = method.getAnnotation(Prompt.class);
-        String promptTemplate = prompt.value();
-        Parameter[] parameters = method.getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            String name = "\\{" + parameters[i].getName() + "}";
-            String replaceValue = args[i].toString();
-            promptTemplate = promptTemplate.replaceAll(name, replaceValue);
-        }
-        logger.debug("promptTemplate: {}", promptTemplate);
+        
+        
         ChatClient.CallResponseSpec call = prompted.user(promptTemplate).call();
         String content = call.content();
         if (returnType == String.class) {
@@ -120,6 +118,63 @@ public class AiServiceInterfaceImpl {
         }
         return AiResponseParser.parse(content, returnType);
 
+    }
+
+    private String getPromptTemplate(Method method, Object[] args) {
+        Prompt prompt = method.getAnnotation(Prompt.class);
+        String promptTemplate = prompt.value();
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            if (parameters[i].getType() == StreamObserver.class) {
+                continue;
+            }
+            if (!BeanUtils.isPrimitiveOrWrapperOrString(parameters[i].getType())) {
+                promptTemplate = dealWithComplexObject(promptTemplate, args[i]);
+            }
+            var name = parameters[i].getName();
+            if (parameters[i].isAnnotationPresent(Val.class)) {
+                name = parameters[i].getAnnotation(Val.class).value();
+            }
+            name = "\\{" + name + "}";
+            String replaceValue = args[i].toString();
+            promptTemplate = promptTemplate.replaceAll(name, replaceValue);
+        }
+        return promptTemplate;
+    }
+
+    private String dealWithComplexObject(String promptTemplate, Object obj) {
+        BeanWrapper wrapper = new BeanWrapperImpl(obj);
+        for (PropertyDescriptor propertyDescriptor : wrapper.getPropertyDescriptors()) {
+            Class<?> propertyType = propertyDescriptor.getPropertyType();
+
+            // skip obj properties
+            if (propertyDescriptor.getReadMethod().getDeclaringClass() == Object.class) {
+                continue;
+            }
+            String name = propertyDescriptor.getName();
+            var propertyValue = wrapper.getPropertyValue(name);
+            if (propertyValue == null) {
+                continue;
+            }
+            if (!BeanUtils.isPrimitiveOrWrapperOrString(propertyType)) {
+                promptTemplate = dealWithComplexObject(promptTemplate, wrapper.getPropertyValue(name));
+            }
+
+            try {
+                Field field = obj.getClass().getDeclaredField(name);
+                if (field.isAnnotationPresent(Val.class)) {
+                    name = field.getAnnotation(Val.class).value();
+                }
+            } catch (NoSuchFieldException e) {
+                logger.warn("Field not found: {}", name);
+                // 字段不存在，继续使用原名
+            }
+            
+            name = "\\{" + name + "}";
+            String replaceValue = propertyValue.toString();
+            promptTemplate = promptTemplate.replaceAll(name, replaceValue);
+        }
+        return promptTemplate;
     }
 
     private void mergeOptions(Options methodOptions, DefaultChatClient.DefaultChatClientRequestSpec prompted) {

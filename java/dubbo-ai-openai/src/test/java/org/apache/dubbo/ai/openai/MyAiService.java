@@ -19,8 +19,12 @@ package org.apache.dubbo.ai.openai;
 import org.apache.dubbo.ai.core.DubboAiService;
 import org.apache.dubbo.ai.core.Options;
 import org.apache.dubbo.ai.core.Prompt;
+import org.apache.dubbo.ai.core.Val;
+import org.apache.dubbo.ai.openai.pojo.ChatMsg;
 import org.apache.dubbo.ai.openai.pojo.Person;
 import org.apache.dubbo.common.stream.StreamObserver;
+
+import java.util.List;
 
 
 @DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "deepseek-chat")
@@ -55,7 +59,14 @@ public interface MyAiService {
 
 
     @Prompt("""
-            请用中文回答我的这个问题:  {userMessage}
+            请用中文回答我的这个问题:  {msg}
             """)
-    void chatStream(String userMessage, StreamObserver<String> response);
+    void chatStream(@Val("msg") String userMessage, StreamObserver<String> response);
+
+
+    @Prompt("""
+            你是一个人类,你的名字是{name}，请你根据{topic}主题,生成{count}个问题,问题为一句话，不要换行，每个问题用\n 分隔。
+            """)
+    @Options(model = "gpt-4o")
+    List<String> complexChat(ChatMsg chatMsg);
 }
