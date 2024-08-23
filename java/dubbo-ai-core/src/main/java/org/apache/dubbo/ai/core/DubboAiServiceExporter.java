@@ -49,6 +49,7 @@ public class DubboAiServiceExporter {
             this.serviceConfig = new ServiceConfig<>();
             serviceConfig.setInterface(interfaceClass);
             serviceConfig.setRef(interfaceImpl);
+            serviceConfig.setTimeout(60000);
             serviceConfig.setExecutor(internalServiceExecutor);
             serviceConfig.setApplication(getApplicationConfig());
             serviceConfig.setProtocol(new ProtocolConfig("tri"));
