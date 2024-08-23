@@ -17,6 +17,7 @@
 package org.apache.dubbo.ai.spring.boot;
 
 import org.apache.dubbo.ai.core.DubboAiService;
+import org.apache.dubbo.ai.core.DubboAiServiceExporter;
 import org.apache.dubbo.ai.core.proxy.ProxyGenerator;
 import org.apache.dubbo.ai.spring.boot.helper.ContextHelper;
 import org.apache.dubbo.common.deploy.ApplicationDeployListener;

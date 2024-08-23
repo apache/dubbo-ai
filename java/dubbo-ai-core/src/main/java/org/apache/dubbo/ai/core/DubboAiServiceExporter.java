@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.spring.boot;
+package org.apache.dubbo.ai.core;
 
 import org.apache.dubbo.common.threadpool.manager.FrameworkExecutorRepository;
 import org.apache.dubbo.config.ApplicationConfig;
@@ -49,6 +49,7 @@ public class DubboAiServiceExporter {
             this.serviceConfig = new ServiceConfig<>();
             serviceConfig.setInterface(interfaceClass);
             serviceConfig.setRef(interfaceImpl);
+            serviceConfig.setTimeout(60000);
             serviceConfig.setExecutor(internalServiceExecutor);
             serviceConfig.setApplication(getApplicationConfig());
             serviceConfig.setProtocol(new ProtocolConfig("tri"));

@@ -16,10 +16,13 @@
  */
 package org.apache.dubbo.ai.openai.pojo;
 
+import org.apache.dubbo.ai.core.Val;
+
 import java.io.Serializable;
 
 public class Person implements Serializable {
 
+    @Val("na")
     private String name;
 
     private int age;
