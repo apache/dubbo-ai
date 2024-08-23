@@ -43,6 +43,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class AiServiceInterfaceImpl {
@@ -50,6 +52,8 @@ public class AiServiceInterfaceImpl {
     private static final Logger logger = LoggerFactory.getLogger(AiServiceInterfaceImpl.class);
 
     private final Class<?> interfaceClass;
+
+    private final Map<Class<?>, Map<String, Field>> cachedFields = new ConcurrentHashMap<>();
 
 
     private final DubboAiContext dubboAiContext;
@@ -78,7 +82,7 @@ public class AiServiceInterfaceImpl {
         for (FunctionInfo functionInfo : functionInfoList) {
             prompted.function(functionInfo.getName(), functionInfo.getDesc(), functionInfo.getInputType(), functionInfo.getFunction());
         }
-        
+
         String promptTemplate = getPromptTemplate(method, args);
         logger.debug("promptTemplate: {}", promptTemplate);
         // stream return
@@ -109,8 +113,8 @@ public class AiServiceInterfaceImpl {
             }
             return null;
         }
-        
-        
+
+
         ChatClient.CallResponseSpec call = prompted.user(promptTemplate).call();
         String content = call.content();
         if (returnType == String.class) {
@@ -160,22 +164,28 @@ public class AiServiceInterfaceImpl {
                 promptTemplate = dealWithComplexObject(promptTemplate, wrapper.getPropertyValue(name));
             }
 
-            try {
-                Field field = obj.getClass().getDeclaredField(name);
-                if (field.isAnnotationPresent(Val.class)) {
-                    name = field.getAnnotation(Val.class).value();
-                }
-            } catch (NoSuchFieldException e) {
-                logger.warn("Field not found: {}", name);
-                // 字段不存在，继续使用原名
-            }
-            
+            name = getFieldNameFromAnnotation(obj, name);
+
             name = "\\{" + name + "}";
             String replaceValue = propertyValue.toString();
             promptTemplate = promptTemplate.replaceAll(name, replaceValue);
         }
         return promptTemplate;
     }
+
+    private String getFieldNameFromAnnotation(Object obj, String name) {
+        Class<?> currentClass = obj.getClass();
+        Map<String, Field> fieldMap = cachedFields.computeIfAbsent(currentClass, BeanUtils::getAllFields);
+        Field field = fieldMap.get(name);
+        if (field == null) {
+            return name;
+        }
+        if (field.isAnnotationPresent(Val.class)) {
+            return field.getAnnotation(Val.class).value();
+        }
+        return name;
+    }
+
 
     private void mergeOptions(Options methodOptions, DefaultChatClient.DefaultChatClientRequestSpec prompted) {
         ChatOptions chatOptions = prompted.getChatOptions();

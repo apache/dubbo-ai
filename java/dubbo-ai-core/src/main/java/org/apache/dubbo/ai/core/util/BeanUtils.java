@@ -19,8 +19,11 @@ package org.apache.dubbo.ai.core.util;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class BeanUtils {
@@ -72,6 +75,19 @@ public class BeanUtils {
     
     public static boolean isPrimitiveOrWrapperOrString(Class<?> clazz) {
         return isPrimitiveOrWrapper(clazz)|| clazz == String.class;
+    }
+    
+    public static Map<String,Field> getAllFields(Class<?> clazz) {
+        Map<String,Field> fieldMap = new HashMap<>();
+        while (clazz != null && clazz != Object.class) {
+            for (Field f : clazz.getDeclaredFields()) {
+                if (!f.isSynthetic()) {
+                    fieldMap.putIfAbsent(f.getName(), f);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return fieldMap;
     }
 
 }

@@ -65,7 +65,7 @@ public interface MyAiService {
 
 
     @Prompt("""
-            你是一个人类,你的名字是{name}，请你根据{topic}主题,生成{count}个问题,问题为一句话，不要换行，每个问题用\n 分隔。
+            你是一个人类,你的名字是{na}，请你根据{topic}主题,生成{count}个问题,问题为一句话，不要换行，每个问题用\n 分隔。
             """)
     @Options(model = "gpt-4o")
     List<String> complexChat(ChatMsg chatMsg);
