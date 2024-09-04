@@ -116,6 +116,9 @@ public class AiServiceInterfaceImpl {
 
 
         ChatClient.CallResponseSpec call = prompted.user(promptTemplate).call();
+        if (!BeanUtils.isPrimitiveOrWrapperOrString(returnType)) {
+            return call.responseEntity(returnType).entity();
+        }
         String content = call.content();
         if (returnType == String.class) {
             return content;

@@ -1,0 +1,11 @@
+dubbo:
+  ai:
+    m1:
+      provider: openai
+      baseUrl: https://api.openai.com
+      sk: sk-xxx
+  application:
+    name: dubbo-ai-test
+    check-serializable: false
+server:
+  port: 8090
