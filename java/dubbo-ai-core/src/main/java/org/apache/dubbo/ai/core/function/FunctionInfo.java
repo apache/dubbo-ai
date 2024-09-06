@@ -18,17 +18,17 @@ package org.apache.dubbo.ai.core.function;
 
 import java.util.function.Function;
 
-public class FunctionInfo<T, I, O> {
+public class FunctionInfo<I, O> {
 
     private final String name;
 
     private final String desc;
 
-    private final Class<T> inputType;
+    private final Class<I> inputType;
 
     private final Function<I, O> function;
 
-    public FunctionInfo(String name, String desc, Class<T> inputType, Function<I, O> function) {
+    public FunctionInfo(String name, String desc, Class<I> inputType, Function<I, O> function) {
         this.name = name;
         this.desc = desc;
         this.inputType = inputType;
@@ -48,7 +48,7 @@ public class FunctionInfo<T, I, O> {
         return desc;
     }
 
-    public Class<?> getInputType() {
+    public Class<I> getInputType() {
         return inputType;
     }
 }

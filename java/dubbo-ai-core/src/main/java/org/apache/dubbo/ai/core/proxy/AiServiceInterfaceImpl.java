@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Function;
 
 public class AiServiceInterfaceImpl {
 
@@ -69,18 +70,16 @@ public class AiServiceInterfaceImpl {
         Class<?> returnType = method.getReturnType();
 
         // get functions from method
-        List<FunctionInfo> functionInfoList = FunctionFactory.getFunctionsByMethod(method);
+        List<FunctionInfo<?,?>> functionInfoList = FunctionFactory.getFunctionsByMethod(method);
 
-        // 如果是复杂对象，则给AI一个提示词，从用户给的数据中返回一个json回来，进行序列化。
-
-        // 非流调用
+        // add options
         DefaultChatClient.DefaultChatClientRequestSpec prompted = (DefaultChatClient.DefaultChatClientRequestSpec) client.prompt();
         Options methodOptions = dubboAiContext.getMethodOptions(method);
         mergeOptions(methodOptions, prompted);
 
         // add functions to ChatClientRequestSpec
-        for (FunctionInfo functionInfo : functionInfoList) {
-            prompted.function(functionInfo.getName(), functionInfo.getDesc(), functionInfo.getInputType(), functionInfo.getFunction());
+        for (FunctionInfo<?,?> functionInfo : functionInfoList) {
+            captureAndAddFunction(functionInfo,prompted);
         }
 
         String promptTemplate = getPromptTemplate(method, args);
@@ -124,7 +123,14 @@ public class AiServiceInterfaceImpl {
             return content;
         }
         return AiResponseParser.parse(content, returnType);
+    }
 
+    private <I, O> void captureAndAddFunction(FunctionInfo<I, O> functionInfo,
+                                              DefaultChatClient.DefaultChatClientRequestSpec prompted) {
+        // 这里我们执行检查，并调用适合泛型的函数
+        Class<I> inputType = functionInfo.getInputType();
+        Function<I, O> function = functionInfo.getFunction();
+        prompted.function(functionInfo.getName(), functionInfo.getDesc(), inputType, function);
     }
 
     private String getPromptTemplate(Method method, Object[] args) {
