@@ -14,56 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.openai;
+package org.apache.dubbo.ai.springboot.samples.service;
 
 import org.apache.dubbo.ai.core.DubboAiService;
-import org.apache.dubbo.ai.core.Options;
 import org.apache.dubbo.ai.core.Prompt;
 import org.apache.dubbo.ai.core.Val;
-import org.apache.dubbo.ai.openai.pojo.ChatMsg;
-import org.apache.dubbo.ai.openai.pojo.Person;
-import org.apache.dubbo.common.stream.StreamObserver;
 
-import java.util.List;
-
-
-@DubboAiService(configPath = "dubbo-ai.properties", providerConfigs = {"m1", "m2"}, model = "deepseek-chat")
-public interface MyAiService {
-
-
-    @Prompt(
-            """
-                    请用中文回答我的这个问题:  {userMessage}
-                    """)
-    @Options(maxTokens = 4096)
-    String chat(String userMessage);
-
-    @Prompt("""
-            {userMessage}
-            """)
-    Person chatTransform(String userMessage);
-
-
+@DubboAiService(providerConfigs = "m1")
+public interface TagAiService {
+    
+    
     @Prompt("""
             我们现在有以下几个标签，1.游戏 2.交友 3.引流 4.吃喝 5.其他
             其中，交友和引流的区别是，交友是单纯的一起聊天，引流是某个话题不说完整，吸引用户加好友或者私聊。
+            游戏标签一般会提到某个游戏或者游戏平台，比如说王者荣耀，和平精英，steam，epic等。
             请你根据上述标签给下面的文本打标，请你只返回标签对应的数字，只返回一个int的数字
             下面是文本：
-            {userMessage}
+            {msg}
             """)
-    @Options(model = "gpt-4o")
-    Integer tagMsg(String userMessage);
-
-
-    @Prompt("""
-            请用中文回答我的这个问题:  {msg}
-            """)
-    void chatStream(@Val("msg") String userMessage, StreamObserver<String> response);
-
-
-    @Prompt("""
-            你是一个人类,你的名字是{na}，请你根据{topic}主题,生成{count}个问题,问题为一句话，不要换行，每个问题用\n 分隔。
-            """)
-    @Options(model = "gpt-4o")
-    List<String> complexChat(ChatMsg chatMsg);
+    Integer aiTag(@Val("msg") String msg);
+    
+    
+    
+    
 }

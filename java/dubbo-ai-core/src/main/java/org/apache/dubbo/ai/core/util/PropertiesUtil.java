@@ -31,7 +31,7 @@ public class PropertiesUtil {
 
     public static Map<String, String> getPropsByPath(String path) {
         if (path.endsWith("yml")) {
-            return getPropertiesByProps(path);
+            return getPropertiesByYml(path);
         } else if (path.endsWith("properties")) {
             return getPropertiesByProps(path);
         } else {

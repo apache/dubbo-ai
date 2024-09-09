@@ -42,6 +42,6 @@ public @interface DubboAiService {
     
     String model() default "gpt-4o";
     
-    String configPath() default "application.yml";
+    String configPath() default "";
     
 }

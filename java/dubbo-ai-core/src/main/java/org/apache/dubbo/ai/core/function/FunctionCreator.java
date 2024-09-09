@@ -23,10 +23,10 @@ import java.util.function.Function;
 
 public class FunctionCreator {
 
-    public static List<FunctionInfo> getAiFunctions(Object obj) {
+    public static List<FunctionInfo<?,?>> getAiFunctions(Object obj) {
         Class<?> clazz = obj.getClass();
         Method[] methods = clazz.getMethods();
-        var wrappers = new ArrayList<FunctionInfo>();
+        var wrappers = new ArrayList<FunctionInfo<?,?>>();
         for (Method method : methods) {
             if (method.isAnnotationPresent(AiFunction.class)) {
                 AiFunction aiFunction = method.getAnnotation(AiFunction.class);
@@ -39,7 +39,7 @@ public class FunctionCreator {
         return wrappers;
     }
 
-    private static FunctionInfo createWrapper(Object obj, Method method, String name, String desc) {
+    private static FunctionInfo<?,?> createWrapper(Object obj, Method method, String name, String desc) {
         return new FunctionInfo<>(name, desc, method.getParameterTypes()[0], createFunction(obj, method));
     }
 

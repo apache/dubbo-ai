@@ -32,6 +32,8 @@
         <module>dubbo-ai-openai</module>
         <module>dubbo-ai-dashscope-spring</module>
         <module>dubbo-ai-dashscope</module>
+        <module>dubbo-ai-samples</module>
+        <module>dubbo-ai-samples/dubbo-ai-springboot-samples</module>
     </modules>
 
     <properties>
@@ -48,7 +50,7 @@
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0-M2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

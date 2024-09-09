@@ -14,41 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.springboot.samples.pojo;
 
-import java.util.function.Function;
+public record MachineInfo(String machineName,
+                          String k8sNamespace,
 
-public class FunctionInfo<I, O> {
+    String k8sContainerName,
 
-    private final String name;
+    String cpuInfo,
 
-    private final String desc;
+    String memoryInfo,
 
-    private final Class<I> inputType;
+    String diskInfo,
 
-    private final Function<I, O> function;
+    String networkInfo){
+    
 
-    public FunctionInfo(String name, String desc, Class<I> inputType, Function<I, O> function) {
-        this.name = name;
-        this.desc = desc;
-        this.inputType = inputType;
-        this.function = function;
-    }
-
-
-    public Function<I, O> getFunction() {
-        return this.function;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public Class<I> getInputType() {
-        return inputType;
-    }
 }

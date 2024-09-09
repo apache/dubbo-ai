@@ -14,41 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.springboot.samples.controller;
 
-import java.util.function.Function;
 
-public class FunctionInfo<I, O> {
+import org.apache.dubbo.ai.springboot.samples.service.SreAiService;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-    private final String name;
-
-    private final String desc;
-
-    private final Class<I> inputType;
-
-    private final Function<I, O> function;
-
-    public FunctionInfo(String name, String desc, Class<I> inputType, Function<I, O> function) {
-        this.name = name;
-        this.desc = desc;
-        this.inputType = inputType;
-        this.function = function;
+@RestController
+public class SreController {
+    
+    
+    @DubboReference
+    private SreAiService sreAiService;
+    
+    @RequestMapping("/api/ai/solve")
+    public String solveProblemByAi(@RequestParam("problem") String msg) {
+        return sreAiService.processProblem(msg);
     }
-
-
-    public Function<I, O> getFunction() {
-        return this.function;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public Class<I> getInputType() {
-        return inputType;
-    }
+    
 }

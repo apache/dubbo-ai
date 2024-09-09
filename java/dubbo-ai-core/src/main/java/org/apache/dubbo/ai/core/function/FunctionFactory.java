@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FunctionFactory {
-    private static final Map<Class<?>, List<FunctionInfo>> FUNCTION_MAPS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, List<FunctionInfo<?, ?>>> FUNCTION_MAPS = new ConcurrentHashMap<>();
 
-    private static final Map<Method, List<FunctionInfo>> CACHED_METHOD_FUNCTIONS_MAP = new ConcurrentHashMap<>();
+    private static final Map<Method, List<FunctionInfo<?, ?>>> CACHED_METHOD_FUNCTIONS_MAP = new ConcurrentHashMap<>();
 
-    public static List<FunctionInfo> getFunctionsByClass(Class<?> clazz) {
+    public static List<FunctionInfo<?, ?>> getFunctionsByClass(Class<?> clazz) {
         return FUNCTION_MAPS.computeIfAbsent(clazz, key -> {
             try {
                 Constructor<?> constructor = clazz.getDeclaredConstructor();
@@ -44,14 +44,14 @@ public class FunctionFactory {
     }
 
 
-    public static List<FunctionInfo> getFunctionsByMethod(Method method) {
+    public static List<FunctionInfo<?, ?>> getFunctionsByMethod(Method method) {
         if (!method.isAnnotationPresent(FunctionCall.class)) {
             return Collections.emptyList();
         }
         return CACHED_METHOD_FUNCTIONS_MAP.computeIfAbsent(method, key -> {
             FunctionCall functionCall = method.getAnnotation(FunctionCall.class);
             Class<?>[] classes = functionCall.functionClasses();
-            List<FunctionInfo> result = new ArrayList<>();
+            List<FunctionInfo<?, ?>> result = new ArrayList<>();
             for (Class<?> functionClass : classes) {
                 result.addAll(getFunctionsByClass(functionClass));
             }

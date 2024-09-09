@@ -14,41 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.dubbo.ai.core.function;
+package org.apache.dubbo.ai.springboot.samples;
 
-import java.util.function.Function;
+import org.apache.dubbo.ai.spring.boot.EnableDubboAiConfiguration;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public class FunctionInfo<I, O> {
-
-    private final String name;
-
-    private final String desc;
-
-    private final Class<I> inputType;
-
-    private final Function<I, O> function;
-
-    public FunctionInfo(String name, String desc, Class<I> inputType, Function<I, O> function) {
-        this.name = name;
-        this.desc = desc;
-        this.inputType = inputType;
-        this.function = function;
-    }
-
-
-    public Function<I, O> getFunction() {
-        return this.function;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public Class<I> getInputType() {
-        return inputType;
+@SpringBootApplication
+@EnableDubboAiConfiguration(scanBasePackage = "org.apache.dubbo.ai.*")
+@EnableDubbo
+public class DubboAiApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DubboAiApplication.class, args);
+        System.out.println("dubbo service started");
     }
 }
